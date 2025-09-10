@@ -17,7 +17,7 @@ function App() {
     if (!isLoading) {
       dispatch(setLoggedInUser(data.result));
     }
-  }, [isLoading]);
+  }, [data, isLoading, dispatch]);
 
   return (
     <>

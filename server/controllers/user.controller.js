@@ -39,16 +39,13 @@ export const loginUser = async (req, res) => {
     if (!isValid) {
       throw new Error("Invalid credentials");
     }
-
-    const token = await jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-    );
+    const userObj = {
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    };
+    const token = await jwt.sign(userObj, process.env.JWT_SECRET);
 
     // Set token to cookie
     res.cookie("token", token, {
@@ -60,7 +57,7 @@ export const loginUser = async (req, res) => {
     res.json({
       success: true,
       message: "User logged in successfully",
-      data: token,
+      result: userObj,
     });
   } catch (error) {
     res.json({

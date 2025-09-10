@@ -1,13 +1,14 @@
 ﻿import React, { useState } from "react";
-import { useCurrentUserQuery, useLoginUserMutation } from "../api/userApi.js";
+import { useLoginUserMutation } from "../api/userApi.js";
 import inputHelper from "../helper/inputHelper.js";
 import { setLoggedInUser } from "../redux/userSlice.js";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
 
 const Login = () => {
   const [loginUser] = useLoginUserMutation();
-  const { data, isLoading } = useCurrentUserQuery();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const initialState = {
     email: "",
     password: "",
@@ -21,10 +22,13 @@ const Login = () => {
     e.preventDefault();
     console.log(userInput);
     try {
-      const response = await loginUser(userInput);
-      if (response.data.success) {
-        console.log(data.result);
-        dispatch(setLoggedInUser(data.result));
+      const response = await loginUser(userInput).unwrap();
+      if (response.success) {
+        console.log(response.result);
+        dispatch(setLoggedInUser(response.result));
+        navigate("/");
+      } else {
+        console.error(response.error);
       }
     } catch (error) {
       console.log(error);

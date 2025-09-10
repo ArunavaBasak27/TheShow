@@ -12,15 +12,17 @@ const Header = () => {
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
-      const response = await logoutUser();
-      if (response.data.success) {
+      const response = await logoutUser().unwrap(); // Use .unwrap() to get the raw response
+      if (response.success) {
         dispatch(setLoggedInUser(null));
+        console.log("Logout successful, user state cleared");
+      } else {
+        console.error("Logout failed:", response);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Logout error:", error);
     }
   };
-
   return (
     <nav className="navbar navbar-expand-lg bg-dark navbar-dark">
       <div className="container-fluid">
@@ -53,10 +55,10 @@ const Header = () => {
             </li>
           </ul>
 
-          <div className="d-flex align-items-center gap-3">
+          <div className="d-flex flex-md-row flex-column gap-3">
             {user && user.id ? (
               <>
-                <span className="text-light">Hello, {user.name}</span>
+                <span className="text-light mt-2">Hello, {user.name}</span>
                 <button
                   onClick={handleLogout}
                   className="btn btn-outline-warning"
