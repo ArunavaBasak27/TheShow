@@ -1,6 +1,8 @@
 ﻿import React, { useState } from "react";
 import inputHelper from "../helper/inputHelper.js";
 import { useRegisterUserMutation } from "../api/userApi.js";
+import toastNotify from "../helper/toastNotify.js";
+import { useNavigate } from "react-router";
 
 const Register = () => {
   const initialState = {
@@ -15,6 +17,7 @@ const Register = () => {
     zip: "",
   };
   const [userInput, setUserInput] = useState(initialState);
+  const navigate = useNavigate();
   const [registerUser] = useRegisterUserMutation();
   const handleInputChange = (e) => {
     const tempData = inputHelper(e, userInput);
@@ -24,13 +27,19 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await registerUser(userInput);
-      console.log(response);
+      const response = await registerUser(userInput).unwrap();
+      if (response.success) {
+        toastNotify({ message: response.message, type: "success" });
+        navigate("/login");
+      } else {
+        toastNotify({ message: response.message, type: "error" });
+      }
     } catch (error) {
-      console.error(error);
+      toastNotify({ message: error.message, type: "error" });
     }
     console.log(userInput);
   };
+
   return (
     <div className="container mt-5 border border-gray-200 p-4">
       <h2>Register</h2>

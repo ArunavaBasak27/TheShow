@@ -1,8 +1,9 @@
 ﻿import React from "react";
 import { Link } from "react-router";
-import { useLogoutUserMutation } from "../api/userApi.js";
+import { useLogoutUserMutation } from "../../api/userApi.js";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoggedInUser } from "../redux/userSlice.js";
+import { setLoggedInUser } from "../../redux/userSlice.js";
+import toastNotify from "../../helper/toastNotify.js";
 
 const Header = () => {
   const [logoutUser] = useLogoutUserMutation();
@@ -15,7 +16,7 @@ const Header = () => {
       const response = await logoutUser().unwrap(); // Use .unwrap() to get the raw response
       if (response.success) {
         dispatch(setLoggedInUser(null));
-        console.log("Logout successful, user state cleared");
+        toastNotify({ message: "Logged out successfully", type: "warning" });
       } else {
         console.error("Logout failed:", response);
       }

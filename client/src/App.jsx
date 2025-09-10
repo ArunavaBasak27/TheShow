@@ -1,4 +1,4 @@
-import Header from "./components/Header.jsx";
+import Header from "./components/layout/Header.jsx";
 import { Route, Routes } from "react-router";
 import Home from "./pages/Home.jsx";
 import Admin from "./pages/Admin.jsx";
@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { useCurrentUserQuery } from "./api/userApi.js";
 import { useDispatch } from "react-redux";
 import { setLoggedInUser } from "./redux/userSlice.js";
+import Footer from "./components/layout/Footer.jsx";
 
 function App() {
   const { data, isLoading } = useCurrentUserQuery();
@@ -20,18 +21,21 @@ function App() {
   }, [data, isLoading, dispatch]);
 
   return (
-    <>
+    <div className="d-flex flex-column min-vh-100">
       <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/partner" element={<Partner />} />
-        <Route path="/user" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="*" element={<h2>Error</h2>} />
-      </Routes>
-    </>
+      <main className="flex-grow-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/partner" element={<Partner />} />
+          <Route path="/user" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="*" element={<h2>Error</h2>} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
   );
 }
 

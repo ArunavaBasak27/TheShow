@@ -8,13 +8,13 @@ export const registerUser = async (req, res) => {
 
     const userExists = await User.findOne({ email: req.body.email });
     if (userExists) {
-      throw new Error("User already exists");
+      throw new Error("User already exists!");
     }
 
     await user.save();
     res.json({
       success: true,
-      message: "User registered successfully",
+      message: "Registration successful",
     });
   } catch (error) {
     res.json({
@@ -56,7 +56,7 @@ export const loginUser = async (req, res) => {
 
     res.json({
       success: true,
-      message: "User logged in successfully",
+      message: "Login successful",
       result: userObj,
     });
   } catch (error) {

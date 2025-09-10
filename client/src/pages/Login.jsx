@@ -4,6 +4,7 @@ import inputHelper from "../helper/inputHelper.js";
 import { setLoggedInUser } from "../redux/userSlice.js";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
+import toastNotify from "../helper/toastNotify.js";
 
 const Login = () => {
   const [loginUser] = useLoginUserMutation();
@@ -20,18 +21,18 @@ const Login = () => {
   };
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log(userInput);
     try {
       const response = await loginUser(userInput).unwrap();
       if (response.success) {
         console.log(response.result);
         dispatch(setLoggedInUser(response.result));
+        toastNotify({ message: "Logged in successfully", type: "success" });
         navigate("/");
       } else {
-        console.error(response.error);
+        toastNotify({ message: response.message, type: "error" });
       }
     } catch (error) {
-      console.log(error);
+      toastNotify({ message: error.message, type: "error" });
     }
   };
   return (
