@@ -1,21 +1,23 @@
 ﻿import React from "react";
-import { Link } from "react-router";
-import { useLogoutUserMutation } from "../api/userApi.js";
+import { Link, useNavigate } from "react-router";
+import { useLogoutUserMutation } from "../../api/userApi.js";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoggedInUser } from "../redux/userSlice.js";
+import { setLoggedInUser } from "../../redux/userSlice.js";
+import toastNotify from "../../helper/toastNotify.js";
 
 const Header = () => {
   const [logoutUser] = useLogoutUserMutation();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.userStore.user);
-
+  const navigate = useNavigate();
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
       const response = await logoutUser().unwrap(); // Use .unwrap() to get the raw response
       if (response.success) {
         dispatch(setLoggedInUser(null));
-        console.log("Logout successful, user state cleared");
+        toastNotify({ message: "Logged out successfully", type: "warning" });
+        navigate("/");
       } else {
         console.error("Logout failed:", response);
       }
@@ -51,6 +53,16 @@ const Header = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/admin">
                 Admin Panel
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/partner">
+                Partner Panel
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/user">
+                Customer Panel
               </Link>
             </li>
           </ul>

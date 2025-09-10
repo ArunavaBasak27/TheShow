@@ -4,6 +4,8 @@ import inputHelper from "../helper/inputHelper.js";
 import { setLoggedInUser } from "../redux/userSlice.js";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
+import toastNotify from "../helper/toastNotify.js";
+import MainLoader from "../components/common/MainLoader.jsx";
 
 const Login = () => {
   const [loginUser] = useLoginUserMutation();
@@ -14,26 +16,32 @@ const Login = () => {
     password: "",
   };
   const [userInput, setUserInput] = useState(initialState);
+  const [loading, setLoading] = useState(false);
   const handleInputChange = (e) => {
     const tempData = inputHelper(e, userInput);
     setUserInput(tempData);
   };
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log(userInput);
     try {
+      setLoading(true);
       const response = await loginUser(userInput).unwrap();
       if (response.success) {
         console.log(response.result);
         dispatch(setLoggedInUser(response.result));
+        toastNotify({ message: "Logged in successfully", type: "success" });
         navigate("/");
       } else {
-        console.error(response.error);
+        toastNotify({ message: response.message, type: "error" });
       }
     } catch (error) {
-      console.log(error);
+      toastNotify({ message: error.message, type: "error" });
     }
+    setLoading(false);
   };
+  if (loading) {
+    return <MainLoader />;
+  }
   return (
     <div className="container mt-5 border border-gray-200 p-5">
       <h2 className="text-center mb-3">Login</h2>
@@ -69,7 +77,11 @@ const Login = () => {
           </div>
         </div>
         <div className="d-flex justify-content-center align-items-center">
-          <button type="submit" className="btn btn-primary form-control w-25">
+          <button
+            disabled={loading}
+            type="submit"
+            className="btn btn-primary form-control w-25"
+          >
             Sign in
           </button>
         </div>
