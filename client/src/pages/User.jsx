@@ -1,7 +1,9 @@
 ﻿import React from "react";
-import withAuth from "../components/hoc/withAuth.jsx";
+import useAuth from "../components/hooks/useAuth.js";
 
 const User = () => {
+  const user = useAuth(["admin", "user"]);
+  if (!user) return null;
   return (
     <div>
       <h2>User</h2>
@@ -9,4 +11,4 @@ const User = () => {
   );
 };
 
-export default withAuth(User);
+export default User;

@@ -1,7 +1,10 @@
 ﻿import React from "react";
-import withPartnerAuth from "../components/hoc/withPartnerAuth.jsx";
+import useAuth from "../components/hooks/useAuth.js";
 
 const Partner = () => {
+  const user = useAuth(["partner"]);
+  if (!user) return null;
+
   return (
     <div>
       <h2>Partner</h2>
@@ -9,4 +12,4 @@ const Partner = () => {
   );
 };
 
-export default withPartnerAuth(Partner);
+export default Partner;

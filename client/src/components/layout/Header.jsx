@@ -50,24 +50,30 @@ const Header = () => {
                 Home
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/admin">
-                Admin Panel
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/partner">
-                Partner Panel
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/user">
-                Customer Panel
-              </Link>
-            </li>
+            {user && user.role === "admin" && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin">
+                  Admin Panel
+                </Link>
+              </li>
+            )}
+            {user && user.role === "partner" && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/partner">
+                  Partner Panel
+                </Link>
+              </li>
+            )}
+            {user && user.role === "user" && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/user">
+                  Customer Panel
+                </Link>
+              </li>
+            )}
           </ul>
 
-          <div className="d-flex flex-md-row flex-column gap-3">
+          <div className="d-flex flex-lg-row flex-column gap-3">
             {user && user.id ? (
               <>
                 <span className="text-light mt-2">Hello, {user.name}</span>

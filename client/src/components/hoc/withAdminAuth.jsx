@@ -8,11 +8,12 @@ const withAdminAuth = (WrappedComponent) => {
     const navigate = useNavigate();
     useEffect(() => {
       if (!user) {
+        console.log("redirect to login");
         navigate("/login");
       } else if (user.role !== "admin") {
         navigate("/accessDenied");
       }
-    }, []);
+    }, [user]);
     if (!user || user.role !== "admin") {
       return null;
     }
