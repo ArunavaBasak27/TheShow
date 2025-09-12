@@ -8,7 +8,7 @@ const useAuth = (allowedRoles) => {
   const user = useSelector((state) => state.userStore.user);
   const navigate = useNavigate();
   useEffect(() => {
-    if (!user && !isLoading && !data.result) {
+    if (!user && !isLoading && !data?.result) {
       navigate("/login");
     } else if (user && allowedRoles && !allowedRoles.includes(user.role)) {
       console.log(user.role);

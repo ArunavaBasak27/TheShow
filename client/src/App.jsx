@@ -18,7 +18,7 @@ function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!isLoading) {
-      dispatch(setLoggedInUser(data.result));
+      dispatch(setLoggedInUser(data?.result));
     }
   }, [data, isLoading, dispatch]);
 
