@@ -47,7 +47,7 @@ const MovieList = () => {
         } else {
           Swal.fire({
             position: "top-end",
-            icon: "Error",
+            icon: "Cancelled",
             title: "Delete failed",
             text: response.message,
             showConfirmButton: false,

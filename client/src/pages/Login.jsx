@@ -27,7 +27,6 @@ const Login = () => {
       setLoading(true);
       const response = await loginUser(userInput).unwrap();
       if (response.success) {
-        console.log(response.result);
         dispatch(setLoggedInUser(response.result));
         toastNotify({ message: "Logged in successfully", type: "success" });
         navigate("/");

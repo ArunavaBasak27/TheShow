@@ -10,7 +10,6 @@ const Admin = () => {
 
   return (
     <div className="container m-3">
-      <h2>Admin panel</h2>
       <Tab.Container defaultActiveKey="movies">
         <Nav variant="tabs">
           <Nav.Item>

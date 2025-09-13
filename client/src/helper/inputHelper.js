@@ -1,6 +1,8 @@
 ﻿const inputHelper = (e, data) => {
   const tempData = { ...data };
-  tempData[e.target.name] = e.target.value;
+  const { name, type, value, checked } = e.target;
+
+  tempData[name] = type === "checkbox" ? checked : value;
   return tempData;
 };
 
