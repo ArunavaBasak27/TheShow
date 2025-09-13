@@ -8,7 +8,6 @@ const Home = () => {
   if (isLoading) {
     return <MainLoader />;
   }
-  console.log(data);
   return (
     <div className="container py-5">
       <h1 className="text-center mb-5 fw-bold">Now Showing</h1>
