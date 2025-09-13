@@ -1,0 +1,17 @@
+﻿{
+  "name": "theshow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/app.js",
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "start": "cd server && npm install && node app.js",
+    "install-all": "cd client && npm install && cd ../server && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArunavaBasak27/TheShow.git"
+  },
+  "private": true
+}
