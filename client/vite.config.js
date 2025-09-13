@@ -7,7 +7,6 @@ import autoprefixer from "autoprefixer";
 export default defineConfig(({ mode }) => {
   // Load env variables from project root
   const env = loadEnv(mode, path.resolve(process.cwd(), ".."), "");
-  console.log(env);
   return {
     plugins: [react()],
     css: {

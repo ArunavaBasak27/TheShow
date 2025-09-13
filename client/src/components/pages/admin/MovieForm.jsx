@@ -10,7 +10,6 @@ import toastNotify from "../../../helper/toastNotify.js";
 import moment from "moment";
 
 const MovieForm = (props) => {
-  console.log(props.movieId);
   const movieId = props.movieId;
   const initialValues = {
     title: "",
@@ -23,7 +22,6 @@ const MovieForm = (props) => {
   };
   const { data, isLoading } = useGetMovieByIdQuery(movieId);
   const [userInput, setUserInput] = useState(initialValues);
-  console.log(userInput);
   useEffect(() => {
     if (props.show) {
       if (!movieId) {
