@@ -69,7 +69,7 @@ const TheatreForm = (props) => {
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Modal heading
+          {theatreId ? "Update" : "Create"} theatre
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
