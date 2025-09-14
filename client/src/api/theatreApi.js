@@ -25,7 +25,7 @@ export const theatreApi = createApi({
       providesTags: ["theatres"],
     }),
     getTheatresByOwner: builder.query({
-      query: () => ({
+      query: (userId) => ({
         url: "/user",
         method: "GET",
         headers: {

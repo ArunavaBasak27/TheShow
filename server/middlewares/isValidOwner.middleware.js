@@ -8,10 +8,8 @@ export const isValidOwnerMiddleware = async (req, res, next) => {
       throw new Error("Please log in");
     }
 
-    const theatresOfUser = (await Theatre.find({ owner: user.id })) ?? [];
-    const isValid = theatresOfUser.filter(
-      (theatre) => theatre.id === theatreId,
-    );
+    const theatre = await Theatre.findById(theatreId);
+    const isValid = theatre.owner == user.id; //theatre.owner might be Object not string
     if (!isValid) {
       throw new Error("You are not owner of this theatre");
     }

@@ -7,9 +7,11 @@ import {
 } from "../../../api/theatreApi.js";
 import TheatreForm from "./TheatreForm.jsx";
 import Swal from "sweetalert2";
+import { useSelector } from "react-redux";
 
 const TheatresTable = () => {
-  const { data, isLoading } = useGetTheatresByOwnerQuery();
+  const user = useSelector((state) => state.userStore.user);
+  const { data, isLoading } = useGetTheatresByOwnerQuery(user.id);
   const [deleteTheatre] = useDeleteTheatreMutation();
   const [modalShow, setModalShow] = useState(false);
   const [theatreId, setTheatreId] = useState(null);
@@ -32,23 +34,34 @@ const TheatresTable = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const response = await deleteTheatre(theatreId).unwrap();
-        if (response.success) {
-          await Swal.fire({
-            position: "top-end",
-            icon: "success",
-            title: "Deleted",
-            text: response.message,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-          setModalShow(false);
-        } else {
+        try {
+          const response = await deleteTheatre(theatreId).unwrap();
+          if (response.success) {
+            await Swal.fire({
+              position: "top-end",
+              icon: "success",
+              title: "Deleted",
+              text: response.message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            setModalShow(false);
+          } else {
+            await Swal.fire({
+              position: "top-end",
+              icon: "Cancelled",
+              title: "Delete failed",
+              text: response.message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          }
+        } catch (error) {
           await Swal.fire({
             position: "top-end",
             icon: "Cancelled",
             title: "Delete failed",
-            text: response.message,
+            text: error.message,
             showConfirmButton: false,
             timer: 1500,
           });
