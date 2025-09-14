@@ -12,6 +12,7 @@ import { setLoggedInUser } from "./redux/userSlice.js";
 import Footer from "./components/layout/Footer.jsx";
 import User from "./pages/User.jsx";
 import AccessDenied from "./pages/AccessDenied.jsx";
+import MovieDetails from "./pages/MovieDetails.jsx";
 
 function App() {
   const { data, isLoading } = useCurrentUserQuery();
@@ -33,6 +34,7 @@ function App() {
           <Route path="/user" element={<User />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/movie/:movieId" element={<MovieDetails />} />
           <Route path="/accessDenied" element={<AccessDenied />} />
           <Route path="*" element={<h2>Error</h2>} />
         </Routes>

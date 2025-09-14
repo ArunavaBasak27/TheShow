@@ -111,6 +111,14 @@ const TheatresTable = () => {
                       >
                         <i className="bi bi-trash-fill"></i>
                       </button>
+                      {theatre.isActive && theatre.isApproved && (
+                        <button
+                          onClick={() => handleDelete(theatre._id)}
+                          className="btn btn-outline-danger"
+                        >
+                          <i className="bi bi-plus"></i>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
