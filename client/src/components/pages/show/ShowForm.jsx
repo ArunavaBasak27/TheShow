@@ -44,17 +44,24 @@ const ShowForm = ({ show, onHide, theatreId, showId }) => {
       } else if (showData && !moviesLoading && !showLoading) {
         setUserInput({
           ...showData?.result,
-          date: moment(showData?.result.date).format("YYYY-MM-DDTHH:mm"), // Fixed: Use 'YYYY-MM-DDTHH:mm' (T separator, 24-hour HH)
+          date: moment
+            .utc(showData?.result.date)
+            .local()
+            .format("YYYY-MM-DDTHH:mm"),
         });
       }
     }
-  }, [show, showLoading, showData, showId, moviesLoading]); // Removed onHide; added explicit deps for clarity
+  }, [show, showLoading, showData, showId, moviesLoading]);
   console.log(userInput);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const showObj = { ...userInput, theatre: theatreId };
+      const showObj = {
+        ...userInput,
+        theatre: theatreId,
+        date: new Date(userInput.date), // JS Date auto converts local → UTC
+      };
       let response;
       if (showId) {
         response = await updateShow(showObj).unwrap();
