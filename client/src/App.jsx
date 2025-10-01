@@ -14,7 +14,7 @@ import User from "./pages/User.jsx";
 import AccessDenied from "./pages/AccessDenied.jsx";
 import MovieDetails from "./pages/MovieDetails.jsx";
 import ChooseShow from "./pages/ChooseShow.jsx";
-import ShowsList from "./components/pages/show/ShowsList.jsx";
+import ShowsList from "./components/pages/partner/ShowsList.jsx";
 
 function App() {
   const { data, isLoading } = useCurrentUserQuery();
