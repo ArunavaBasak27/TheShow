@@ -32,7 +32,6 @@ const BookShow = () => {
 
     const totalSeats = show.totalSeats || 0;
     const bookedSeats = show.bookedSeats || [];
-    console.log(bookedSeats);
     // Assume 10 seats per row (can adjust as needed)
     const seatsPerRow = 15;
     const rows = Math.ceil(totalSeats / seatsPerRow);
