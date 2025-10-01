@@ -1,8 +1,9 @@
 ﻿import React from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { useGetMovieByIdQuery } from "../api/movieApi.js";
 import MainLoader from "../components/common/MainLoader.jsx";
 import { convertMinutes } from "../helper/convertMinutes.js";
+import moment from "moment";
 
 const MovieDetails = () => {
   const { movieId } = useParams();
@@ -39,9 +40,12 @@ const MovieDetails = () => {
                 </div>
               </div>
               <div className="text-end">
-                <button className="btn btn-success btn-lg px-4">
+                <Link
+                  to={`/movie/${movie._id}/shows/${moment(new Date().setDate(new Date().getDate() + 1)).format("YYYYMMDD")}`}
+                  className="btn btn-success btn-lg px-4"
+                >
                   Book Show
-                </button>
+                </Link>
               </div>
             </div>
           </div>

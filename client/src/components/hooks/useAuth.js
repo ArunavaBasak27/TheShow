@@ -11,7 +11,6 @@ const useAuth = (allowedRoles) => {
     if (!user && !isLoading && !data?.result) {
       navigate("/login");
     } else if (user && allowedRoles && !allowedRoles.includes(user.role)) {
-      console.log(user.role);
       navigate("/accessDenied");
     }
   }, [allowedRoles, user, navigate, data, isLoading]);

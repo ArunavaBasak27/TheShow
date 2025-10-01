@@ -8,6 +8,7 @@ import {
 import TheatreForm from "./TheatreForm.jsx";
 import Swal from "sweetalert2";
 import { useSelector } from "react-redux";
+import { Link } from "react-router";
 
 const TheatresTable = () => {
   const user = useSelector((state) => state.userStore.user);
@@ -85,6 +86,7 @@ const TheatresTable = () => {
             <th>Address</th>
             <th>Phone</th>
             <th>Email</th>
+            <th>Shows</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -97,6 +99,17 @@ const TheatresTable = () => {
                   <td>{theatre.address}</td>
                   <td>{theatre.phone}</td>
                   <td>{theatre.email}</td>
+                  <td>
+                    {" "}
+                    {theatre.isActive && theatre.isApproved && (
+                      <Link
+                        to={`/partner/theatre/${theatre._id}/shows`}
+                        className="btn btn-outline-success"
+                      >
+                        <i className="bi bi-info-circle"></i> Shows
+                      </Link>
+                    )}
+                  </td>
                   <td>
                     <div className="d-flex flex-row gap-2">
                       <button
@@ -111,14 +124,6 @@ const TheatresTable = () => {
                       >
                         <i className="bi bi-trash-fill"></i>
                       </button>
-                      {theatre.isActive && theatre.isApproved && (
-                        <button
-                          onClick={() => handleDelete(theatre._id)}
-                          className="btn btn-outline-danger"
-                        >
-                          <i className="bi bi-plus"></i>
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>

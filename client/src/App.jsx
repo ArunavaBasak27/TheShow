@@ -13,6 +13,8 @@ import Footer from "./components/layout/Footer.jsx";
 import User from "./pages/User.jsx";
 import AccessDenied from "./pages/AccessDenied.jsx";
 import MovieDetails from "./pages/MovieDetails.jsx";
+import ChooseShow from "./pages/ChooseShow.jsx";
+import ShowsList from "./components/pages/show/ShowsList.jsx";
 
 function App() {
   const { data, isLoading } = useCurrentUserQuery();
@@ -31,10 +33,15 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/partner" element={<Partner />} />
+          <Route
+            path="/partner/theatre/:theatreId/shows"
+            element={<ShowsList />}
+          />
           <Route path="/user" element={<User />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/movie/:movieId" element={<MovieDetails />} />
+          <Route path="/movie/:movieId/shows/:date" element={<ChooseShow />} />
           <Route path="/accessDenied" element={<AccessDenied />} />
           <Route path="*" element={<h2>Error</h2>} />
         </Routes>
