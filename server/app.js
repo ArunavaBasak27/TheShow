@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { theatreRoutes } from "./routes/theatre.routes.js";
 import { showRoutes } from "./routes/show.routes.js";
+import { bookingRoutes } from "./routes/booking.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,6 +35,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/theatres", theatreRoutes);
 app.use("/api/shows", showRoutes);
+app.use("/api/bookings", bookingRoutes);
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
 });

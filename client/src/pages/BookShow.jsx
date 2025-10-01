@@ -5,9 +5,13 @@ import { useGetShowByIdQuery } from "../api/showApi.js";
 import { useGetTheatreByIdQuery } from "../api/theatreApi.js";
 import MainLoader from "../components/common/MainLoader.jsx";
 import moment from "moment";
+import ConfirmBooking from "../components/pages/booking/ConfirmBooking.jsx";
+import { useSelector } from "react-redux";
 
 const BookShow = () => {
   const { movieId, showId, theatreId } = useParams();
+  const user = useSelector((state) => state.userStore.user);
+  const [modalShow, setModalShow] = React.useState(false);
   const { data: movieData, isLoading: movieLoading } =
     useGetMovieByIdQuery(movieId);
 
@@ -28,7 +32,7 @@ const BookShow = () => {
 
     const totalSeats = show.totalSeats || 0;
     const bookedSeats = show.bookedSeats || [];
-
+    console.log(bookedSeats);
     // Assume 10 seats per row (can adjust as needed)
     const seatsPerRow = 15;
     const rows = Math.ceil(totalSeats / seatsPerRow);
@@ -88,7 +92,7 @@ const BookShow = () => {
               )
                 .filter((seatNo) => seatNo <= totalSeats)
                 .map((seatNo) => {
-                  const isBooked = bookedSeats.includes(seatNo);
+                  const isBooked = bookedSeats.includes(seatNo.toString());
                   const isSelected = selectedSeats.includes(seatNo);
 
                   return (
@@ -119,11 +123,18 @@ const BookShow = () => {
           <h6>Total Price: Rs. {selectedSeats.length * show.ticketPrice}/-</h6>
           <button
             className="btn btn-primary mt-2"
-            disabled={selectedSeats.length === 0}
+            onClick={() => setModalShow(true)}
+            disabled={selectedSeats.length === 0 || !user}
           >
             Proceed to Book
           </button>
         </div>
+
+        <ConfirmBooking
+          show={modalShow}
+          onHide={() => setModalShow(false)}
+          seats={selectedSeats}
+        />
       </div>
     );
   }

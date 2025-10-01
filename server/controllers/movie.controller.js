@@ -20,7 +20,6 @@ export const getMovieById = async (req, res) => {
   try {
     const movieId = req.params.movieId;
     const movie = await Movie.findById(movieId);
-    console.log(movie);
     res.json({
       success: true,
       message: "Movies fetched successfully",
