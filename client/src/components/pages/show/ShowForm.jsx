@@ -44,11 +44,11 @@ const ShowForm = ({ show, onHide, theatreId, showId }) => {
       } else if (showData && !moviesLoading && !showLoading) {
         setUserInput({
           ...showData?.result,
-          date: moment(showData?.result.date).format("yyyy-MM-DD hh:mm"),
+          date: moment(showData?.result.date).format("YYYY-MM-DDTHH:mm"), // Fixed: Use 'YYYY-MM-DDTHH:mm' (T separator, 24-hour HH)
         });
       }
     }
-  }, [show, onHide, showLoading, showData]);
+  }, [show, showLoading, showData, showId, moviesLoading]); // Removed onHide; added explicit deps for clarity
   console.log(userInput);
 
   const onSubmit = async (e) => {
