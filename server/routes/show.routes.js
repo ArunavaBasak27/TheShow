@@ -12,7 +12,7 @@ import {
 
 const router = express.Router();
 
-router.get("/:showId", authMiddleware, getShowById);
+router.get("/:showId", getShowById);
 router.get("/", getShowsByFilter);
 router.get(
   "/:theatreId",

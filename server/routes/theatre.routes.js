@@ -14,9 +14,9 @@ import { roleMiddleware } from "../middlewares/role.middleware.js";
 
 const router = express.Router();
 
-router.get("/", authMiddleware, getAllTheatres);
+router.get("/", getAllTheatres);
 router.get("/user", authMiddleware, getTheatresByOwner);
-router.get("/:theatreId", authMiddleware, getTheatreById);
+router.get("/:theatreId", getTheatreById);
 
 router.post("/", authMiddleware, createTheatre);
 

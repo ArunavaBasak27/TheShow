@@ -71,7 +71,11 @@ const ChooseShow = () => {
                   aria-label={`Showtimes for ${theatre.name}`}
                 >
                   {theatre.shows.map((show) => (
-                    <Link key={show._id} className="btn btn-outline-secondary">
+                    <Link
+                      to={`/movie/${movieId}/theatre/${theatre._id}/show/${show._id}`}
+                      key={show._id}
+                      className="btn btn-outline-secondary"
+                    >
                       {show.time}
                     </Link>
                   ))}
