@@ -1,5 +1,5 @@
 import { Theatre } from "../models/theatre.model.js";
-import { Show } from "../models/show.modal.js";
+import { Show } from "../models/show.model.js";
 
 export const getShowById = async (req, res) => {
   try {

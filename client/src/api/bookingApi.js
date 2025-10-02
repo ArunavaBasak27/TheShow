@@ -4,6 +4,24 @@ export const bookingApi = createApi({
   reducerPath: "bookingApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/api/bookings" }),
   endpoints: (builder) => ({
+    getBookingsForUser: builder.query({
+      query: () => ({
+        url: "/user",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
+    getBookingsForPartner: builder.query({
+      query: () => ({
+        url: "/partner",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
     createBooking: builder.mutation({
       query: (bookingObj) => ({
         url: "/",
@@ -17,4 +35,8 @@ export const bookingApi = createApi({
   }),
 });
 
-export const { useCreateBookingMutation } = bookingApi;
+export const {
+  useGetBookingsForUserQuery,
+  useGetBookingsForPartnerQuery,
+  useCreateBookingMutation,
+} = bookingApi;

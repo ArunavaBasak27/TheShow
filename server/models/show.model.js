@@ -34,4 +34,4 @@ const showSchema = new Schema(
   { timestamps: true },
 );
 
-export const Show = model("show", showSchema);
+export const Show = model("shows", showSchema);

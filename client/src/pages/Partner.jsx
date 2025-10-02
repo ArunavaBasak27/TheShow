@@ -2,7 +2,7 @@
 import useAuth from "../components/hooks/useAuth.js";
 import { Nav, Tab } from "react-bootstrap";
 import TheatresTable from "../components/pages/partner/TheatresTable.jsx";
-import BookingsTable from "../components/pages/partner/BookingsTable.jsx";
+import PartnerBookingsTable from "../components/pages/partner/PartnerBookingsTable.jsx";
 
 const Partner = () => {
   const user = useAuth(["partner"]);
@@ -26,7 +26,7 @@ const Partner = () => {
           </Tab.Pane>
 
           <Tab.Pane eventKey="bookings">
-            <BookingsTable />
+            <PartnerBookingsTable />
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>
