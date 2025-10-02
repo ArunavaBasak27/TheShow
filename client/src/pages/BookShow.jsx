@@ -76,44 +76,46 @@ const BookShow = () => {
           </div>
         </div>
 
-        {/* Seating Arrangement */}
-        <div className="text-center mb-2">
+        {/* Seating Layout */}
+        <div className="text-center mb-3">
           <div className="bg-secondary text-white py-1 rounded">
             Screen this side
           </div>
         </div>
-        <div className="d-flex flex-column align-items-center">
-          {Array.from({ length: rows }, (_, rowIndex) => (
-            <div key={rowIndex} className="d-flex mb-2">
-              {Array.from(
-                { length: seatsPerRow },
-                (_, seatIndex) => rowIndex * seatsPerRow + seatIndex + 1,
-              )
-                .filter((seatNo) => seatNo <= totalSeats)
-                .map((seatNo) => {
-                  const isBooked = bookedSeats.includes(seatNo.toString());
-                  const isSelected = selectedSeats.includes(seatNo);
 
-                  return (
-                    <button
-                      key={seatNo}
-                      className={`btn mx-1 ${
-                        isBooked
-                          ? "btn-danger"
-                          : isSelected
-                            ? "btn-success"
-                            : "btn-outline-secondary"
-                      }`}
-                      style={{ width: "40px", height: "40px", padding: "6px" }}
-                      onClick={() => handleSeatClick(seatNo)}
-                      disabled={isBooked}
-                    >
-                      {seatNo}
-                    </button>
-                  );
-                })}
-            </div>
-          ))}
+        {/* Scrollable Grid Container */}
+        <div className="overflow-auto w-100 d-flex justify-content-start">
+          <div
+            className="d-grid gap-2 mx-auto"
+            style={{
+              gridTemplateColumns: "repeat(15, 1fr)", // 15 seats per row
+              width: "600px", // fixed block width
+            }}
+          >
+            {Array.from({ length: totalSeats }, (_, index) => {
+              const seatNo = index + 1;
+              const isBooked = bookedSeats.includes(seatNo.toString());
+              const isSelected = selectedSeats.includes(seatNo);
+
+              return (
+                <button
+                  key={seatNo}
+                  className={`btn btn-sm ${
+                    isBooked
+                      ? "btn-danger"
+                      : isSelected
+                        ? "btn-success"
+                        : "btn-outline-secondary"
+                  }`}
+                  style={{ width: "40px", height: "40px", fontSize: "0.8rem" }}
+                  onClick={() => handleSeatClick(seatNo)}
+                  disabled={isBooked}
+                >
+                  {seatNo}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Selected Seats Summary */}
