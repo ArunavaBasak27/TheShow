@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { theatreRoutes } from "./routes/theatre.routes.js";
 import { showRoutes } from "./routes/show.routes.js";
 import { bookingRoutes } from "./routes/booking.routes.js";
+import Stripe from "stripe";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,8 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: "../.env" });
 
 const app = express();
+
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Front end service
 app.use(

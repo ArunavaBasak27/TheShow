@@ -16,6 +16,10 @@ const bookingSchema = new Schema(
       type: Array,
       required: true,
     },
+    transactionId: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true },
 );

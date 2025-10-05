@@ -1,11 +1,62 @@
 ﻿import { Booking } from "../models/booking.model.js";
 import { Show } from "../models/show.model.js";
 import { Theatre } from "../models/theatre.model.js";
+import { stripe } from "../app.js";
+import { User } from "../models/user.model.js";
+
+export const initiatePayment = async (req, res) => {
+  try {
+    const { showId, seats } = req.body;
+    const show = await Show.findById(showId);
+
+    const user = await User.findById(req.user.id);
+    const customer = await stripe.customers.create({
+      name: user.name,
+      address: {
+        line1: user.address,
+        city: user.city,
+        state: user.state,
+        postal_code: user.zip,
+        country: "IN",
+      },
+      email: user.email,
+    });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: show.ticketPrice * seats.length * 100,
+      currency: "inr",
+      description: `Payment for seats ${seats.join(",")}`,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      customer: customer.id, // required for export compliance
+      metadata: {
+        showId: showId,
+        seats: seats.join(","),
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Payment intent created",
+      result: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const createBooking = async (req, res) => {
   try {
-    const { show: showId, seats } = req.body;
+    const { transactionId } = req.body;
 
+    const paymentIntent = await stripe.paymentIntents.retrieve(transactionId);
+
+    const showId = paymentIntent.metadata.showId;
+    const seats = paymentIntent.metadata.seats.split(",");
     // Try to reserve seats atomically
     const updatedShow = await Show.findOneAndUpdate(
       { _id: showId, bookedSeats: { $nin: seats } },
@@ -22,8 +73,10 @@ export const createBooking = async (req, res) => {
 
     // Create booking
     const booking = new Booking({
-      ...req.body,
+      transactionId: transactionId,
       user: req.user.id,
+      seats: seats,
+      show: showId,
     });
     await booking.save();
 

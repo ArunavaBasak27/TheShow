@@ -32,6 +32,16 @@ export const bookingApi = createApi({
         body: bookingObj,
       }),
     }),
+    initiatePayment: builder.mutation({
+      query: (bookingObj) => ({
+        url: "/initiatePayment",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: bookingObj,
+      }),
+    }),
   }),
 });
 
@@ -39,4 +49,5 @@ export const {
   useGetBookingsForUserQuery,
   useGetBookingsForPartnerQuery,
   useCreateBookingMutation,
+  useInitiatePaymentMutation,
 } = bookingApi;

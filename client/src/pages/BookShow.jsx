@@ -1,13 +1,21 @@
-﻿import React, { useState } from "react";
-import { useParams } from "react-router";
+﻿import React, { useEffect, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useGetMovieByIdQuery } from "../api/movieApi.js";
 import { useGetShowByIdQuery } from "../api/showApi.js";
 import { useGetTheatreByIdQuery } from "../api/theatreApi.js";
 import MainLoader from "../components/common/MainLoader.jsx";
 import moment from "moment";
-import ConfirmBooking from "../components/pages/booking/ConfirmBooking.jsx";
+import CheckoutForm from "../components/pages/booking/CheckoutForm.jsx";
 import { useSelector } from "react-redux";
+import {
+  useCreateBookingMutation,
+  useInitiatePaymentMutation,
+} from "../api/bookingApi.js";
+import toastNotify from "../helper/toastNotify.js";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const BookShow = () => {
   const { movieId, showId, theatreId } = useParams();
   const user = useSelector((state) => state.userStore.user);
@@ -15,14 +23,61 @@ const BookShow = () => {
   const { data: movieData, isLoading: movieLoading } =
     useGetMovieByIdQuery(movieId);
 
-  const { data: showData, isLoading: showLoading } =
-    useGetShowByIdQuery(showId);
+  const { data: showData, isLoading: showLoading } = useGetShowByIdQuery(
+    showId,
+    {
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
   const { data: theatreData, isLoading: theatreLoading } =
     useGetTheatreByIdQuery(theatreId, { skip: !theatreId });
 
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [initiatePayment] = useInitiatePaymentMutation();
+  const [createBooking] = useCreateBookingMutation();
+  const [clientSecret, setClientSecret] = useState("");
+  const appearance = {
+    theme: "stripe",
+  };
+  // Enable the skeleton loader UI for optimal loading.
+  const loader = "auto";
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    async function completeBooking() {
+      const transactionId = searchParams.get("payment_intent");
+      if (transactionId) {
+        const response = await createBooking({ transactionId }).unwrap();
+        if (response) {
+          navigate("/user");
+          toastNotify({ message: "Booking successful", type: "success" });
+        } else {
+          toastNotify({ message: "Booking failed", type: "error" });
+        }
+      }
+    }
 
+    completeBooking();
+  }, [searchParams]);
+
+  const handleBooking = async () => {
+    try {
+      const response = await initiatePayment({
+        showId,
+        seats: selectedSeats,
+      }).unwrap();
+      console.log(response);
+      if (response.success) {
+        setClientSecret(response.result);
+      } else {
+        throw new Error(response.message);
+      }
+      setModalShow(true);
+    } catch (error) {
+      toastNotify({ message: error.message, type: "error" });
+    }
+  };
   if (movieLoading || showLoading || theatreLoading) {
     return <MainLoader />;
   } else {
@@ -124,18 +179,25 @@ const BookShow = () => {
           <h6>Total Price: Rs. {selectedSeats.length * show.ticketPrice}/-</h6>
           <button
             className="btn btn-primary mt-2"
-            onClick={() => setModalShow(true)}
+            onClick={handleBooking}
             disabled={selectedSeats.length === 0 || !user}
           >
             Proceed to Book
           </button>
         </div>
-
-        <ConfirmBooking
-          show={modalShow}
-          onHide={() => setModalShow(false)}
-          seats={selectedSeats}
-        />
+        {clientSecret && (
+          <Elements
+            options={{ clientSecret, appearance, loader }}
+            stripe={stripePromise}
+          >
+            <CheckoutForm
+              show={modalShow}
+              onHide={() => setModalShow(false)}
+              seats={selectedSeats}
+              successUrl={window.location.href}
+            />
+          </Elements>
+        )}
       </div>
     );
   }

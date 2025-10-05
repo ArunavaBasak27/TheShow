@@ -3,12 +3,14 @@ import {
   createBooking,
   getBookingsForPartner,
   getBookingsForUser,
+  initiatePayment,
 } from "../controllers/booking.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 router.post("/", authMiddleware, createBooking);
+router.post("/initiatePayment", authMiddleware, initiatePayment);
 router.get("/partner", authMiddleware, getBookingsForPartner);
 router.get("/user", authMiddleware, getBookingsForUser);
 export const bookingRoutes = router;

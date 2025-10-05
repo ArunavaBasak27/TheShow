@@ -20,6 +20,7 @@ import BookShow from "./pages/BookShow.jsx";
 function App() {
   const { data, isLoading } = useCurrentUserQuery();
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (!isLoading) {
       dispatch(setLoggedInUser(data?.result));

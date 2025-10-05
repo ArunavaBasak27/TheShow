@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, path.resolve(process.cwd(), ".."), "");
   return {
     plugins: [react()],
+    envDir: path.resolve(process.cwd(), ".."),
     css: {
       postcss: {
         plugins: [autoprefixer()],
