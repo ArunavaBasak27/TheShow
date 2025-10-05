@@ -178,7 +178,7 @@ const BookShow = () => {
           <h5>Selected Seats: {selectedSeats.join(", ") || "None"}</h5>
           <h6>Total Price: Rs. {selectedSeats.length * show.ticketPrice}/-</h6>
           <button
-            className="btn btn-primary mt-2"
+            className="btn btn-success mt-2"
             onClick={handleBooking}
             disabled={selectedSeats.length === 0 || !user}
           >
@@ -193,8 +193,8 @@ const BookShow = () => {
             <CheckoutForm
               show={modalShow}
               onHide={() => setModalShow(false)}
-              seats={selectedSeats}
               successUrl={window.location.href}
+              ticketPrice={show.ticketPrice * selectedSeats.length}
             />
           </Elements>
         )}
