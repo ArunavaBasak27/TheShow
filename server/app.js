@@ -18,6 +18,7 @@ dotenv.config({ path: "../.env" });
 
 const app = express();
 
+// Load the environment variables from .env
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Front end service

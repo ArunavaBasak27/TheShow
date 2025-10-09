@@ -3,6 +3,8 @@ import { Show } from "../models/show.model.js";
 import { Theatre } from "../models/theatre.model.js";
 import { stripe } from "../app.js";
 import { User } from "../models/user.model.js";
+import emailHelper from "../email/emailHelper.js";
+import moment from "moment";
 
 export const initiatePayment = async (req, res) => {
   try {
@@ -80,9 +82,32 @@ export const createBooking = async (req, res) => {
     });
     await booking.save();
 
+    // Send email confirmation
+    const bookingInfo = await Booking.findById(booking._id)
+      .populate("user")
+      .populate({
+        path: "show",
+        populate: { path: ["theatre", "movie"] },
+      });
+
+    await emailHelper({
+      receiverEmail: bookingInfo.user.email,
+      templateName: "ticketTemplate.html",
+      credentials: {
+        name: bookingInfo.user.name,
+        movie: bookingInfo.show.movie.title,
+        theatre: bookingInfo.show.theatre.name,
+        date: moment(bookingInfo.show.date).format("dd/MM/yyyy"),
+        time: moment(bookingInfo.show.date).format("hh:mm A"),
+        seats: bookingInfo.seats.join(","),
+        amount: bookingInfo.seats.length * bookingInfo.show.ticketPrice,
+        transactionId: bookingInfo.transactionId,
+      },
+    });
+
     res.json({
       success: true,
-      message: "Booking created",
+      message: "Booking created. Please check your email for tickets",
     });
   } catch (error) {
     res.status(500).json({
