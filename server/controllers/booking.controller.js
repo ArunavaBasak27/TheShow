@@ -82,7 +82,6 @@ export const createBooking = async (req, res) => {
     });
     await booking.save();
 
-    // Send email confirmation
     const bookingInfo = await Booking.findById(booking._id)
       .populate("user")
       .populate({
@@ -90,20 +89,24 @@ export const createBooking = async (req, res) => {
         populate: { path: ["theatre", "movie"] },
       });
 
-    await emailHelper({
-      receiverEmail: bookingInfo.user.email,
-      templateName: "ticketTemplate.html",
-      credentials: {
-        name: bookingInfo.user.name,
-        movie: bookingInfo.show.movie.title,
-        theatre: bookingInfo.show.theatre.name,
-        date: moment(bookingInfo.show.date).format("dd/MM/yyyy"),
-        time: moment(bookingInfo.show.date).format("hh:mm A"),
-        seats: bookingInfo.seats.join(","),
-        amount: bookingInfo.seats.length * bookingInfo.show.ticketPrice,
-        transactionId: bookingInfo.transactionId,
-      },
-    });
+    if (bookingInfo.user.isVerified) {
+      // Send email confirmation for verified users
+
+      await emailHelper({
+        receiverEmail: bookingInfo.user.email,
+        templateName: "ticketTemplate.html",
+        credentials: {
+          name: bookingInfo.user.name,
+          movie: bookingInfo.show.movie.title,
+          theatre: bookingInfo.show.theatre.name,
+          date: moment(bookingInfo.show.date).format("dd/MM/yyyy"),
+          time: moment(bookingInfo.show.date).format("hh:mm A"),
+          seats: bookingInfo.seats.join(","),
+          amount: bookingInfo.seats.length * bookingInfo.show.ticketPrice,
+          transactionId: bookingInfo.transactionId,
+        },
+      });
+    }
 
     res.json({
       success: true,
