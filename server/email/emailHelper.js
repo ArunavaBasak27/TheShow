@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
@@ -8,15 +7,6 @@ dotenv.config({ path: "../.env" });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const transport = nodemailer.createTransport({
-  service: "gmail",
-  port: 587,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.APP_PASSWORD,
-  },
-});
 
 const replaceContent = (content, credentials) => {
   return Object.keys(credentials).reduce((updatedContent, key) => {
@@ -32,16 +22,34 @@ const emailHelper = async ({ receiverEmail, templateName, credentials }) => {
     const templatePath = path.join(__dirname, "templates", templateName);
     let content = await fs.promises.readFile(templatePath, "utf8");
     content = replaceContent(content, credentials);
-    const emailDetails = {
-      from: process.env.GMAIL_USER,
-      to: receiverEmail,
+
+    const emailPayload = {
+      sender: { email: process.env.BREVO_SENDER_EMAIL },
+      to: [{ email: receiverEmail }],
       subject: "Mail from The Show",
-      html: content,
+      htmlContent: content,
     };
-    await transport.sendMail(emailDetails);
-    console.log(`Email sent from: ${emailDetails.from} to ${emailDetails.to}`);
+
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(emailPayload),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to send email");
+    }
+
+    console.log(
+      `Email sent to ${receiverEmail}. Message ID: ${result.messageId}`,
+    );
   } catch (error) {
-    console.log(error.message);
+    console.log("Email send error:", error.message);
   }
 };
 
