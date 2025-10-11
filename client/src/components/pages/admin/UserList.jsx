@@ -1,34 +1,32 @@
 ﻿import React from "react";
 import {
-  useChangeTheatreStatusMutation,
-  useGetAllTheatresQuery,
-} from "../../../api/theatreApi.js";
+  useGetAllUsersQuery,
+  useVerifyUserMutation,
+} from "../../../api/userApi.js";
 import MainLoader from "../../common/MainLoader.jsx";
 import { Table } from "react-bootstrap";
 import Swal from "sweetalert2";
 
-const TheatreList = () => {
-  const { data, isLoading } = useGetAllTheatresQuery();
-  const [toggleStatus] = useChangeTheatreStatusMutation();
-
+const UserList = () => {
+  const { data, isLoading } = useGetAllUsersQuery();
+  const [verifyUser] = useVerifyUserMutation();
   if (isLoading) {
     return <MainLoader />;
   }
-  const changeApproval = async (theatreObj) => {
+  const toggleUserVerify = async (userObj) => {
     try {
-      const theatreId = theatreObj._id;
-      const status = theatreObj.isApproved ? "block" : "approve";
+      const userId = userObj._id;
+      const status = userObj.isVerified ? "unverify" : "verify";
       await Swal.fire({
-        title: `Are you sure you want to ${status} ?`,
-        icon: "question",
+        title: `Are you sure you want to ${status} ${userObj.name.split(" ")[0]}?`,
+        icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: `Yes, ${status} it!`,
+        confirmButtonText: `Yes, ${status}!`,
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const response = await toggleStatus(theatreId).unwrap();
-          console.log(response);
+          const response = await verifyUser(userId).unwrap();
           if (response.success) {
             await Swal.fire({
               position: "top-end",
@@ -45,7 +43,7 @@ const TheatreList = () => {
     } catch (error) {
       await Swal.fire({
         position: "top-end",
-        icon: "error",
+        icon: "success",
         title: error.message,
         showConfirmButton: false,
         timer: 1500,
@@ -53,35 +51,32 @@ const TheatreList = () => {
     }
   };
   return (
-    <div className="container m-3">
+    <div>
+      <h2></h2>
       <Table className="mt-5" hover size="sm" responsive="sm">
-        <thead className="">
+        <thead>
           <tr>
             <th>Name</th>
             <th>Address</th>
             <th>Phone</th>
             <th>Email</th>
-            <th>Owner</th>
-            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody className="table-group-divider">
-          {data.result &&
-            data.result.map((theatre, index) => (
+          {data?.result.map((user, index) => {
+            return (
               <tr key={index}>
-                <td>{theatre.name}</td>
-                <td>{theatre.address}</td>
-                <td>{theatre.phone}</td>
-                <td>{theatre.email}</td>
-                <td>{theatre.owner.name}</td>
-                <td>{theatre.isActive ? "Open" : "Closed"}</td>
-                <td className="text-center">
+                <td>{user.name}</td>
+                <td>{user.address}</td>
+                <td>{user.phone}</td>
+                <td>{user.email}</td>
+                <td>
                   <button
-                    onClick={() => changeApproval(theatre)}
-                    className={`btn btn-outline-${theatre.isApproved ? "danger" : "success"}`}
+                    onClick={() => toggleUserVerify(user)}
+                    className={`btn btn-outline-${user.isVerified ? "danger" : "success"}`}
                   >
-                    {theatre.isApproved ? (
+                    {user.isVerified ? (
                       <i className="bi bi-ban"></i>
                     ) : (
                       <i className="bi bi-check"></i>
@@ -89,11 +84,12 @@ const TheatreList = () => {
                   </button>
                 </td>
               </tr>
-            ))}
+            );
+          })}
         </tbody>
       </Table>
     </div>
   );
 };
 
-export default TheatreList;
+export default UserList;

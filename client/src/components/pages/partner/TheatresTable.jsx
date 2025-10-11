@@ -79,7 +79,7 @@ const TheatresTable = () => {
       <button className="btn btn-outline-primary" onClick={handleCreate}>
         <i className="bi bi-plus"></i> Add Theatre
       </button>
-      <Table className="mt-5" bordered hover size="sm" responsive="sm">
+      <Table className="mt-5" hover size="sm" responsive="sm">
         <thead>
           <tr>
             <th>Name</th>
@@ -90,7 +90,7 @@ const TheatresTable = () => {
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="table-group-divider">
           {data.result &&
             data.result.map((theatre, index) => {
               return (

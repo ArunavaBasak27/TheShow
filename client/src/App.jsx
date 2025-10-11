@@ -16,6 +16,8 @@ import MovieDetails from "./pages/MovieDetails.jsx";
 import ChooseShow from "./pages/ChooseShow.jsx";
 import ShowsList from "./components/pages/partner/ShowsList.jsx";
 import BookShow from "./pages/BookShow.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 
 function App() {
   const { data, isLoading } = useCurrentUserQuery();
@@ -42,6 +44,8 @@ function App() {
           <Route path="/user" element={<User />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/movie/:movieId" element={<MovieDetails />} />
           <Route path="/movie/:movieId/shows/:date" element={<ChooseShow />} />
           <Route

@@ -6,7 +6,7 @@ const BookingList = ({ bookings = [] }) => {
   console.log(bookings);
   return (
     <div>
-      <Table className="mt-5" bordered hover size="sm" responsive="sm">
+      <Table className="mt-5" hover size="sm" responsive="sm">
         <thead>
           <tr>
             <th>Customer Name</th>
@@ -18,7 +18,7 @@ const BookingList = ({ bookings = [] }) => {
             <th>Booked Seats</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="table-group-divider">
           {bookings.map((booking, index) => {
             return (
               <tr key={index}>

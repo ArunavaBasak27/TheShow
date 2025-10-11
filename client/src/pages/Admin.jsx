@@ -3,6 +3,7 @@ import { Nav, Tab } from "react-bootstrap";
 import MovieList from "../components/pages/admin/MovieList.jsx";
 import TheatreList from "../components/pages/admin/TheatreList.jsx";
 import useAuth from "../components/hooks/useAuth.js";
+import UserList from "../components/pages/admin/UserList.jsx";
 
 const Admin = () => {
   const user = useAuth(["admin"]);
@@ -18,6 +19,9 @@ const Admin = () => {
           <Nav.Item>
             <Nav.Link eventKey="theatres">Theatres</Nav.Link>
           </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="customers">Customers</Nav.Link>
+          </Nav.Item>
         </Nav>
         <Tab.Content>
           <Tab.Pane eventKey="movies">
@@ -25,6 +29,9 @@ const Admin = () => {
           </Tab.Pane>
           <Tab.Pane eventKey="theatres">
             <TheatreList />
+          </Tab.Pane>
+          <Tab.Pane eventKey="customers">
+            <UserList />
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>

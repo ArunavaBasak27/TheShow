@@ -3,7 +3,7 @@ import { useLoginUserMutation } from "../api/userApi.js";
 import inputHelper from "../helper/inputHelper.js";
 import { setLoggedInUser } from "../redux/userSlice.js";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import toastNotify from "../helper/toastNotify.js";
 import MainLoader from "../components/common/MainLoader.jsx";
 
@@ -17,10 +17,12 @@ const Login = () => {
   };
   const [userInput, setUserInput] = useState(initialState);
   const [loading, setLoading] = useState(false);
+
   const handleInputChange = (e) => {
     const tempData = inputHelper(e, userInput);
     setUserInput(tempData);
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -38,18 +40,23 @@ const Login = () => {
     }
     setLoading(false);
   };
+
   if (loading) {
     return <MainLoader />;
   }
+
   return (
-    <div className="container mt-5 border border-gray-200 p-5">
-      <h2 className="text-center mb-3">Login</h2>
-      <form onSubmit={handleLogin}>
-        <div className="row mb-3">
-          <label htmlFor="inputEmail3" className="col-sm-2 col-form-label">
-            Email
-          </label>
-          <div className="col-sm-10">
+    <div className="container mt-5 d-flex justify-content-center">
+      <div
+        className="border border-gray-300 p-4 rounded shadow-sm w-100"
+        style={{ maxWidth: "500px" }}
+      >
+        <h2 className="text-center mb-4">Login</h2>
+        <form onSubmit={handleLogin}>
+          <div className="mb-3">
+            <label htmlFor="inputEmail3" className="form-label">
+              Email
+            </label>
             <input
               type="email"
               className="form-control"
@@ -57,14 +64,14 @@ const Login = () => {
               name="email"
               value={userInput.email}
               onChange={handleInputChange}
+              placeholder="Enter your email"
+              required
             />
           </div>
-        </div>
-        <div className="row mb-3">
-          <label htmlFor="inputPassword3" className="col-sm-2 col-form-label">
-            Password
-          </label>
-          <div className="col-sm-10">
+          <div className="mb-2">
+            <label htmlFor="inputPassword3" className="form-label">
+              Password
+            </label>
             <input
               type="password"
               className="form-control"
@@ -72,19 +79,29 @@ const Login = () => {
               name="password"
               value={userInput.password}
               onChange={handleInputChange}
+              placeholder="Enter your password"
+              required
             />
           </div>
-        </div>
-        <div className="d-flex justify-content-center align-items-center">
-          <button
-            disabled={loading}
-            type="submit"
-            className="btn btn-primary form-control w-25"
-          >
-            Sign in
-          </button>
-        </div>
-      </form>
+          <div className="mb-3 text-end">
+            <Link
+              to="/forgot-password"
+              className="text-decoration-none text-primary"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+          <div className="d-grid">
+            <button
+              disabled={loading}
+              type="submit"
+              className="btn btn-primary"
+            >
+              Sign in
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

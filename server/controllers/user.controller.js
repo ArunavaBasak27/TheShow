@@ -1,6 +1,7 @@
 ﻿import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import emailHelper from "../email/emailHelper.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -88,6 +89,103 @@ export const currentUser = async (req, res) => {
       success: true,
       message: "User fetched",
       result: req.user,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const userList = await User.find({ role: "user" }).select("-password");
+    res.json({
+      success: true,
+      message: "User fetched",
+      result: userList,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const verifyUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    user.isVerified = !user.isVerified;
+    await user.save();
+    res.json({
+      success: true,
+      message: `User ${user.isVerified ? "verified" : "unverified"} updated successfully`,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      throw new Error("Email is required");
+    }
+    const user = await User.findOne({ email: email });
+
+    if (user?.otp && Date.now() < user?.otpExpiry) {
+      throw new Error("OTP is already sent. Please check your mail");
+    }
+    const otp = Math.floor(Math.random() * 10000 + 90000);
+    user.otp = otp.toString();
+    user.otpExpiry = Date.now() + 10 * 60 * 1000;
+    await user.save();
+    await emailHelper({
+      templateName: "otpTemplate.html",
+      receiverEmail: user.email,
+      credentials: {
+        name: user.name,
+        otp: user.otp,
+      },
+    });
+    res.json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { otp, password } = req.body;
+    if (!otp || !password) {
+      throw new Error("Password and OTP are required");
+    }
+
+    const user = await User.findOne({ otp: otp });
+
+    if (Date.now() > user.otpExpiry) {
+      throw new Error("OTP expired");
+    }
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    user.password = password;
+    await user.save();
+    res.json({
+      success: true,
+      message: "Password reset successfully",
     });
   } catch (error) {
     res.json({
