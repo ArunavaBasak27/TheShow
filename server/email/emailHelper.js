@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import dotenv from "dotenv";
+import juice from "juice";
 
 dotenv.config({ path: "../.env" });
 
@@ -22,7 +23,7 @@ const emailHelper = async ({ receiverEmail, templateName, credentials }) => {
     const templatePath = path.join(__dirname, "templates", templateName);
     let content = await fs.promises.readFile(templatePath, "utf8");
     content = replaceContent(content, credentials);
-
+    content = juice(content);
     const emailPayload = {
       sender: { email: process.env.BREVO_SENDER_EMAIL },
       to: [{ email: receiverEmail }],
