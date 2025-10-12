@@ -8,7 +8,7 @@ const User = () => {
   if (!user) return null;
 
   return (
-    <div className="container m-3">
+    <div className="p-3 m-3">
       <Tab.Container defaultActiveKey="bookings">
         <Nav variant="tabs">
           <Nav.Item>

@@ -10,7 +10,7 @@ const Admin = () => {
   if (!user) return null;
 
   return (
-    <div className="container m-3">
+    <div className="p-3 m-3">
       <Tab.Container defaultActiveKey="movies">
         <Nav variant="tabs">
           <Nav.Item>
