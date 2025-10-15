@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
-import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import Stripe from "stripe";
 
@@ -25,9 +24,6 @@ const port = process.env.PORT || 5000;
 
 // Stripe instance
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Security middleware
-app.use(helmet());
 
 // Static file serving for frontend
 app.use(
