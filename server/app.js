@@ -12,6 +12,7 @@ import { theatreRoutes } from "./routes/theatre.routes.js";
 import { showRoutes } from "./routes/show.routes.js";
 import { bookingRoutes } from "./routes/booking.routes.js";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +23,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Trust proxy for Render (gets real client IP)
-app.set("trust proxy", true);
+app.set("trust proxy", 1);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -49,6 +50,22 @@ app.use(
 // Body and cookie parsers
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "example.com"], // Allow scripts from 'self' and example.com
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles (unsafe)
+      imgSrc: ["'self'", "data:", "example.com"], // Allow images from 'self', data URLs, and example.com
+      connectSrc: ["'self'", "api.example.com"], // Allow connections to 'self' and api.example.com
+      fontSrc: ["'self'", "fonts.gstatic.com"], // Allow fonts from 'self' and fonts.gstatic.com
+      objectSrc: ["'none'"], // Disallow object, embed, and applet elements
+      upgradeInsecureRequests: [], // Upgrade insecure requests to HTTPS
+    },
+  }),
+);
 
 //rate limit API
 app.use("/api/", limiter);
