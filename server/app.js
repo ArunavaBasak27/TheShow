@@ -13,6 +13,7 @@ import { showRoutes } from "./routes/show.routes.js";
 import { bookingRoutes } from "./routes/booking.routes.js";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import { safeSanitize } from "./middlewares/safeSanitize.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,6 +80,7 @@ app.use(
     },
   }),
 );
+app.use(safeSanitize);
 
 //rate limit API
 app.use("/api/", limiter);
