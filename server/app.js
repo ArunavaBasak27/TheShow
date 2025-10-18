@@ -51,21 +51,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(helmet());
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "example.com"], // Allow scripts from 'self' and example.com
-      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles (unsafe)
-      imgSrc: ["'self'", "data:", "example.com"], // Allow images from 'self', data URLs, and example.com
-      connectSrc: ["'self'", "api.example.com"], // Allow connections to 'self' and api.example.com
-      fontSrc: ["'self'", "fonts.gstatic.com"], // Allow fonts from 'self' and fonts.gstatic.com
-      objectSrc: ["'none'"], // Disallow object, embed, and applet elements
-      upgradeInsecureRequests: [], // Upgrade insecure requests to HTTPS
-    },
-  }),
-);
+
 
 //rate limit API
 app.use("/api/", limiter);
