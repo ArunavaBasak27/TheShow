@@ -11,6 +11,7 @@ import { movieRoutes } from "./routes/movie.routes.js";
 import { theatreRoutes } from "./routes/theatre.routes.js";
 import { showRoutes } from "./routes/show.routes.js";
 import { bookingRoutes } from "./routes/booking.routes.js";
+import rateLimit from "express-rate-limit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +20,17 @@ dotenv.config({ path: "../.env" });
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+// Trust proxy for Render (gets real client IP)
+app.set("trust proxy", true);
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: { error: "Too many requests from this IP, please try again later." },
+  standardHeaders: true, // Include rate limit headers
+  legacyHeaders: false,
+});
 
 // Stripe instance
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -37,6 +49,9 @@ app.use(
 // Body and cookie parsers
 app.use(express.json());
 app.use(cookieParser());
+
+//rate limit API
+app.use("/api/", limiter);
 
 // API routes
 app.use("/api/user", userRoutes);
