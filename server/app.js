@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
-import { rateLimit } from "express-rate-limit";
 import Stripe from "stripe";
 
 import { connectDB } from "./database/connectDB.js";
@@ -12,7 +11,6 @@ import { movieRoutes } from "./routes/movie.routes.js";
 import { theatreRoutes } from "./routes/theatre.routes.js";
 import { showRoutes } from "./routes/show.routes.js";
 import { bookingRoutes } from "./routes/booking.routes.js";
-import { safeSanitize } from "./middlewares/safeSanitize.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,19 +37,6 @@ app.use(
 // Body and cookie parsers
 app.use(express.json());
 app.use(cookieParser());
-
-// Sanitize incoming data to prevent NoSQL injection
-app.use(safeSanitize);
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
-  ipv6Subnet: 56,
-});
-app.use("/api", limiter);
 
 // API routes
 app.use("/api/user", userRoutes);
