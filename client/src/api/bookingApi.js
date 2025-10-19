@@ -31,7 +31,7 @@ export const bookingApi = createApi({
       },
     }),
     getBookingsForPartner: builder.query({
-      query: ({ page, limit, search } = {}) => {
+      query: ({ user, page, limit, search } = {}) => {
         const isPaginated = page !== undefined || limit !== undefined;
 
         const params = new URLSearchParams();

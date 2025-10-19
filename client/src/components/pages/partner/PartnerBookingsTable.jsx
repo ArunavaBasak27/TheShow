@@ -5,6 +5,7 @@ import MainLoader from "../../common/MainLoader.jsx";
 import Pagination from "../../common/Pagination.jsx";
 import { useTableSearch } from "../../hooks/useTableSearch.js";
 import SearchBar from "../../common/SearchBar.jsx";
+import { useSelector } from "react-redux";
 
 const PartnerBookingsTable = () => {
   const {
@@ -16,7 +17,10 @@ const PartnerBookingsTable = () => {
     setPage,
   } = useTableSearch(1, 500);
 
+  const user = useSelector((state) => state.userStore.user);
+
   const { data, isLoading, isFetching } = useGetBookingsForPartnerQuery({
+    user,
     page,
     search: debouncedSearch,
   });
