@@ -1,5 +1,4 @@
 ﻿import React, { useState } from "react";
-import { Table } from "react-bootstrap";
 import Swal from "sweetalert2";
 
 import MainLoader from "../../common/MainLoader.jsx";
@@ -9,6 +8,7 @@ import {
   useGetAllTheatresQuery,
 } from "../../../api/theatreApi.js";
 import Pagination from "../../common/Pagination.jsx";
+import DataTable from "../../common/DataTable.jsx";
 
 const TheatreList = () => {
   const [page, setPage] = useState(1);
@@ -57,106 +57,86 @@ const TheatreList = () => {
     return <MainLoader />;
   }
 
+  const columns = [
+    {
+      key: "name",
+      label: "Name",
+      width: "18%",
+    },
+    {
+      key: "address",
+      label: "Address",
+      width: "22%",
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      width: "12%",
+    },
+    {
+      key: "email",
+      label: "Email",
+      width: "18%",
+    },
+    {
+      key: "owner",
+      label: "Owner",
+      width: "15%",
+      render: (value) => {
+        return <span>{value.name}</span>;
+      },
+    },
+    {
+      key: "action",
+      label: "Action",
+      width: "15%",
+      render: (value, row) => {
+        return (
+          <div className="d-flex gap-2 justify-content-center">
+            <button
+              onClick={() => changeApproval(row)}
+              className={`btn btn-sm btn-outline-${row.isApproved ? "danger" : "success"}`}
+              title={row.isApproved ? "Block Theatre" : "Approve Theatre"}
+              style={{ minWidth: "80px" }}
+            >
+              {row.isApproved ? (
+                <>
+                  <i className="bi bi-ban me-1"></i> Block
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-check-lg me-1"></i> Approve
+                </>
+              )}
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="container py-4">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h4 className="fw-bold mb-0">Theatre List</h4>
       </div>
 
-      <div className="table-responsive">
-        <Table bordered hover className="align-middle mb-0">
-          <thead className="table-light">
-            <tr>
-              <th style={{ width: "18%" }}>Name</th>
-              <th style={{ width: "22%" }}>Address</th>
-              <th style={{ width: "12%" }}>Phone</th>
-              <th style={{ width: "18%" }}>Email</th>
-              <th style={{ width: "15%" }}>Owner</th>
-              <th style={{ width: "15%" }}>Status</th>
-              <th style={{ width: "140px" }} className="text-center">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.result?.length > 0 ? (
-              data.result.map((theatre) => (
-                <tr key={theatre._id}>
-                  <td className="fw-semibold">{theatre.name}</td>
-                  <td>
-                    <div
-                      style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        lineHeight: "1.4em",
-                        maxHeight: "2.8em",
-                      }}
-                      title={theatre.address}
-                    >
-                      {theatre.address}
-                    </div>
-                  </td>
-                  <td>{theatre.phone}</td>
-                  <td>{theatre.email}</td>
-                  <td>{theatre.owner?.name || "N/A"}</td>
-                  <td>
-                    <span
-                      className={`badge bg-${theatre.isActive ? "success" : "danger"}`}
-                    >
-                      {theatre.isActive ? "Open" : "Closed"}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2 justify-content-center">
-                      <button
-                        onClick={() => changeApproval(theatre)}
-                        className={`btn btn-sm btn-outline-${theatre.isApproved ? "danger" : "success"}`}
-                        title={
-                          theatre.isApproved
-                            ? "Block Theatre"
-                            : "Approve Theatre"
-                        }
-                        style={{ minWidth: "80px" }}
-                      >
-                        {theatre.isApproved ? (
-                          <>
-                            <i className="bi bi-ban me-1"></i> Block
-                          </>
-                        ) : (
-                          <>
-                            <i className="bi bi-check-lg me-1"></i> Approve
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center py-5 text-muted">
-                  <div>
-                    <i className="bi bi-building fs-1 d-block mb-3"></i>
-                    <p className="mb-0">No theatres found.</p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+      <DataTable
+        columns={columns}
+        data={data?.result || []}
+        isLoading={isLoading}
+        emptyMessage="No theatres found. Add your first theatre to get started!"
+      />
 
-        {data?.total_pages > 1 && (
-          <div className="d-flex justify-content-center mt-4">
-            <Pagination
-              totalPages={data.total_pages}
-              onPageChange={(page) => setPage(page)}
-            />
-          </div>
-        )}
-      </div>
+      {data?.total_pages > 1 && (
+        <div className="d-flex justify-content-center mt-4">
+          <Pagination
+            totalPages={data.total_pages}
+            onPageChange={(page) => setPage(page)}
+          />
+        </div>
+      )}
+      {/*</div>*/}
     </div>
   );
 };

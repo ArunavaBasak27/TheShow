@@ -18,7 +18,10 @@ export const getAllTheatres = async (req, res) => {
       totalItems = await Theatre.countDocuments();
       totalPages = Math.ceil(totalItems / itemsPerPage);
 
-      theatres = await Theatre.find().skip(startIndex).limit(itemsPerPage);
+      theatres = await Theatre.find()
+        .populate("owner")
+        .skip(startIndex)
+        .limit(itemsPerPage);
     } else {
       theatres = await Theatre.find().populate("owner");
       totalItems = theatres.length;
@@ -74,6 +77,7 @@ export const getTheatresByOwner = async (req, res) => {
 
       totalPages = Math.ceil(totalItems / itemsPerPage);
       theatres = await Theatre.find({ owner: ownerId })
+
         .skip(startIndex)
         .limit(itemsPerPage);
     }
