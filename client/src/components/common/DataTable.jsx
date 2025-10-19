@@ -1,5 +1,4 @@
-﻿// src/components/common/DataTable.jsx
-import React from "react";
+﻿import React from "react";
 import { Table } from "react-bootstrap";
 import MainLoader from "./MainLoader.jsx";
 

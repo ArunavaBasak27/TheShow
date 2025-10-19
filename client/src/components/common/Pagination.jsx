@@ -1,9 +1,16 @@
 ﻿import { useEffect, useState } from "react";
 
-const Pagination = ({ onPageChange, totalPages }) => {
+const Pagination = ({ onPageChange, totalPages, currentPage = 1 }) => {
+  // Add currentPage prop, default to 1
   const [pages, setPages] = useState([]);
-  const [selectedPage, setSelectedPage] = useState(1);
+  const [selectedPage, setSelectedPage] = useState(currentPage); // Initialize with prop
   const THRESHOLD = 3;
+
+  // Sync internal state with parent's currentPage
+  useEffect(() => {
+    setSelectedPage(currentPage);
+    setNewPageList(currentPage);
+  }, [currentPage]);
 
   useEffect(() => {
     const list = Array.from(
@@ -17,9 +24,9 @@ const Pagination = ({ onPageChange, totalPages }) => {
     if (selectedPage > totalPages && totalPages > 0) {
       setSelectedPage(1);
       setNewPageList(1);
-      onPageChange(1);
+      onPageChange(1); // Notify parent to sync
     }
-  }, [totalPages]);
+  }, [totalPages, selectedPage, onPageChange]); // Add dependencies for safety
 
   const setNewPageList = (pageNo) => {
     const itemsLength = Math.min(totalPages, THRESHOLD);
@@ -39,8 +46,8 @@ const Pagination = ({ onPageChange, totalPages }) => {
 
   const handleClick = (page) => {
     if (page < 1 || page > totalPages) return;
-    onPageChange(page);
-    setSelectedPage(page);
+    onPageChange(page); // This will update parent's page, which flows back via currentPage
+    // No need to setSelectedPage here—parent's update will trigger the sync useEffect
     setNewPageList(page);
   };
 

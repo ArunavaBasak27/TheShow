@@ -5,18 +5,32 @@ import MovieForm from "./MovieForm.jsx";
 import Pagination from "../../common/Pagination.jsx";
 import MainLoader from "../../common/MainLoader.jsx";
 import DataTable from "../../common/DataTable.jsx";
+import SearchBar from "../../common/SearchBar.jsx";
 
+import { useTableSearch } from "../../hooks/useTableSearch";
 import {
   useDeleteMovieMutation,
   useGetAllMoviesQuery,
 } from "../../../api/movieApi.js";
 
 const MovieList = () => {
-  const [page, setPage] = useState(1);
   const [modalShow, setModalShow] = useState(false);
   const [movieId, setMovieId] = useState(null);
 
-  const { data, isLoading } = useGetAllMoviesQuery({ page });
+  const {
+    page,
+    searchTerm,
+    debouncedSearch,
+    handleSearch,
+    handleClearSearch,
+    setPage,
+  } = useTableSearch(1, 500);
+
+  //  Destructure isFetching to show loader on refetch (e.g., clear)
+  const { data, isLoading, isFetching } = useGetAllMoviesQuery({
+    page,
+    search: debouncedSearch,
+  });
   const [deleteMovie] = useDeleteMovieMutation();
 
   const handleEdit = (id) => {
@@ -35,15 +49,29 @@ const MovieList = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const response = await deleteMovie(id).unwrap();
-        Swal.fire({
-          position: "top-end",
-          icon: response.success ? "success" : "error",
-          title: response.success ? "Deleted" : "Delete failed",
-          text: response.message,
-          showConfirmButton: false,
-          timer: 1500,
-        });
+        try {
+          const response = await deleteMovie(id).unwrap();
+          Swal.fire({
+            position: "top-end",
+            icon: response.success ? "success" : "error",
+            title: response.success ? "Deleted" : "Delete failed",
+            text: response.message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          if (response.success) {
+            setPage(1); // Reset to page 1 after delete
+          }
+        } catch (error) {
+          Swal.fire({
+            position: "top-end",
+            icon: "error",
+            title: "Delete failed",
+            text: error?.data?.message || "An error occurred",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
       }
     });
   };
@@ -102,7 +130,8 @@ const MovieList = () => {
     },
   ];
 
-  if (isLoading) return <MainLoader />;
+  // UPDATED: Show loader on initial load OR refetch (covers clear races)
+  if (isLoading || isFetching) return <MainLoader />;
 
   return (
     <div className="container py-4">
@@ -119,20 +148,34 @@ const MovieList = () => {
         </button>
       </div>
 
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        onClear={handleClearSearch}
+        placeholder="Search by title, description, genre, or language..."
+        resultsCount={data?.total_items}
+        resultsQuery={debouncedSearch}
+      />
+
       <DataTable
         columns={columns}
         data={data?.result || []}
-        isLoading={isLoading}
+        isLoading={false} // UPDATED: Pass false; parent handles via isFetching
         onEdit={handleEdit}
         onDelete={handleDelete}
-        emptyMessage="No movies found. Add your first movie to get started!"
+        emptyMessage={
+          debouncedSearch
+            ? `No movies found matching "${debouncedSearch}"`
+            : "No movies found. Add your first movie to get started!"
+        }
       />
 
       {data?.total_pages > 1 && (
         <div className="d-flex justify-content-center mt-4">
           <Pagination
             totalPages={data.total_pages}
-            onPageChange={(page) => setPage(page)}
+            currentPage={page}
+            onPageChange={setPage}
           />
         </div>
       )}

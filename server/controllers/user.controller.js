@@ -100,26 +100,37 @@ export const currentUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const { page, limit } = req.query;
+    const { page, limit, search } = req.query;
     let userList;
     let totalItems;
     let totalPages = 1;
     let currentPage = 1;
     const isPaginated = page !== undefined || limit !== undefined;
 
+    let searchQuery = {};
+    if (search) {
+      searchQuery = {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
     if (isPaginated) {
       currentPage = parseInt(page) || 1;
       const itemsPerPage = parseInt(limit) || 4;
       const startIndex = (currentPage - 1) * itemsPerPage;
-      totalItems = await User.countDocuments();
+      totalItems = await User.countDocuments(searchQuery);
       totalPages = Math.ceil(totalItems / itemsPerPage);
 
-      userList = await User.find()
+      userList = await User.find(searchQuery)
         .select("-password")
         .skip(startIndex)
         .limit(itemsPerPage);
     } else {
-      userList = await User.find().select("-password");
+      userList = await User.find(searchQuery).select("-password");
       totalItems = userList.length;
     }
 

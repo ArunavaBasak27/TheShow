@@ -1,13 +1,32 @@
 ﻿import { Theatre } from "../models/theatre.model.js";
+import { User } from "../models/user.model.js";
 
 export const getAllTheatres = async (req, res) => {
   try {
-    const { page, limit } = req.query;
-
+    const { page, limit, search } = req.query;
     let theatres;
     let totalItems;
     let totalPages = 1;
     let currentPage = 1;
+
+    let searchQuery = {};
+    if (search) {
+      const matchedOwners = await User.find({
+        name: { $regex: search, $options: "i" },
+      }).select("_id");
+
+      const ownerIds = matchedOwners.map((owner) => owner._id);
+
+      searchQuery = {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { address: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+          { owner: { $in: ownerIds } },
+        ],
+      };
+    }
 
     const isPaginated = page !== undefined || limit !== undefined;
     if (isPaginated) {
@@ -15,15 +34,15 @@ export const getAllTheatres = async (req, res) => {
       const itemsPerPage = parseInt(limit) || 5;
       const startIndex = (currentPage - 1) * itemsPerPage;
 
-      totalItems = await Theatre.countDocuments();
+      totalItems = await Theatre.countDocuments(searchQuery);
       totalPages = Math.ceil(totalItems / itemsPerPage);
 
-      theatres = await Theatre.find()
+      theatres = await Theatre.find(searchQuery)
         .populate("owner")
         .skip(startIndex)
         .limit(itemsPerPage);
     } else {
-      theatres = await Theatre.find().populate("owner");
+      theatres = await Theatre.find(searchQuery).populate("owner");
       totalItems = theatres.length;
     }
     res.json({
@@ -41,6 +60,7 @@ export const getAllTheatres = async (req, res) => {
     });
   }
 };
+
 export const getTheatreById = async (req, res) => {
   try {
     const theatreId = req.params.theatreId;
@@ -59,34 +79,37 @@ export const getTheatreById = async (req, res) => {
 };
 export const getTheatresByOwner = async (req, res) => {
   try {
-    const { page, limit } = req.query;
-
-    let theatres;
-    let totalItems;
-    let totalPages = 1;
-    let currentPage = 1;
-
-    const isPaginated = page !== undefined || limit !== undefined;
+    const { page, limit, search } = req.query;
     const ownerId = req.user.id;
-    theatres = await Theatre.find({ owner: ownerId });
-    totalItems = theatres.length;
-    if (isPaginated) {
-      currentPage = parseInt(page) || 1;
-      const itemsPerPage = parseInt(limit) || 4;
-      const startIndex = (currentPage - 1) * itemsPerPage;
 
-      totalPages = Math.ceil(totalItems / itemsPerPage);
-      theatres = await Theatre.find({ owner: ownerId })
+    let searchQuery = { owner: ownerId };
 
-        .skip(startIndex)
-        .limit(itemsPerPage);
+    if (search) {
+      searchQuery.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { address: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
+      ];
     }
 
+    const isPaginated = page !== undefined || limit !== undefined;
+    let currentPage = parseInt(page) || 1;
+    const itemsPerPage = parseInt(limit) || 4;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+
+    const totalItems = await Theatre.countDocuments(searchQuery);
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const theatres = await Theatre.find(searchQuery)
+      .skip(isPaginated ? startIndex : 0)
+      .limit(isPaginated ? itemsPerPage : totalItems);
+
     res.json({
-      result: theatres,
       success: true,
-      message: `Theatres fetched successfully`,
-      page: page,
+      message: "Theatres fetched successfully",
+      result: theatres,
+      page: currentPage,
       total_pages: totalPages,
       total_items: totalItems,
     });

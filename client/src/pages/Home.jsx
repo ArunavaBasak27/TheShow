@@ -22,6 +22,7 @@ const Home = () => {
       </div>
       <Pagination
         onPageChange={(page) => setPage(page)}
+        currentPage={page}
         totalPages={data.total_pages}
       />
     </div>

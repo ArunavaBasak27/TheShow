@@ -19,6 +19,7 @@ const PartnerBookingsTable = () => {
           <div className="d-flex justify-content-center mt-4">
             <Pagination
               totalPages={data.total_pages}
+              currentPage={page}
               onPageChange={(page) => setPage(page)}
             />
           </div>

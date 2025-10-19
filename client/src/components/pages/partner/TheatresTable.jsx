@@ -12,14 +12,27 @@ import {
 import Pagination from "../../common/Pagination.jsx";
 import DataTable from "../../common/DataTable.jsx";
 import { Link } from "react-router";
+import { useTableSearch } from "../../hooks/useTableSearch.js";
+import SearchBar from "../../common/SearchBar.jsx";
 
 const TheatresTable = () => {
-  const [page, setPage] = useState(1);
+  const {
+    page,
+    searchTerm,
+    debouncedSearch,
+    handleSearch,
+    handleClearSearch,
+    setPage,
+  } = useTableSearch(1, 500);
+
   const user = useSelector((state) => state.userStore.user);
-  const { data, isLoading } = useGetTheatresByOwnerQuery({
+
+  const { data, isLoading, isFetching } = useGetTheatresByOwnerQuery({
     userId: user.id,
     page,
+    search: debouncedSearch,
   });
+
   const [deleteTheatre] = useDeleteTheatreMutation();
   const [modalShow, setModalShow] = useState(false);
   const [theatreId, setTheatreId] = useState(null);
@@ -74,7 +87,7 @@ const TheatresTable = () => {
     setModalShow(true);
   };
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <MainLoader />;
   }
 
@@ -145,6 +158,15 @@ const TheatresTable = () => {
         </button>
       </div>
 
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        onClear={handleClearSearch}
+        placeholder="Search by title, description, genre, or language..."
+        resultsCount={data?.total_items}
+        resultsQuery={debouncedSearch}
+      />
+
       <DataTable
         columns={columns}
         data={data?.result || []}
@@ -153,109 +175,12 @@ const TheatresTable = () => {
         onDelete={handleDelete}
         emptyMessage="No theatres found. Add your first theatre to get started!"
       />
-      {/*<div className="table-responsive">*/}
-      {/*  <Table bordered hover className="align-middle mb-0">*/}
-      {/*    <thead className="table-light">*/}
-      {/*      <tr>*/}
-      {/*        <th style={{ width: "18%" }}>Name</th>*/}
-      {/*        <th style={{ width: "25%" }}>Address</th>*/}
-      {/*        <th style={{ width: "12%" }}>Phone</th>*/}
-      {/*        <th style={{ width: "18%" }}>Email</th>*/}
-      {/*        <th style={{ width: "12%" }}>Status</th>*/}
-      {/*        <th style={{ width: "15%" }} className="text-center">*/}
-      {/*          Shows*/}
-      {/*        </th>*/}
-      {/*        <th style={{ width: "140px" }} className="text-center">*/}
-      {/*          Actions*/}
-      {/*        </th>*/}
-      {/*      </tr>*/}
-      {/*    </thead>*/}
-      {/*    <tbody>*/}
-      {/*      {theatres.length > 0 ? (*/}
-      {/*        theatres.map((theatre) => (*/}
-      {/*          <tr key={theatre._id}>*/}
-      {/*            <td className="fw-semibold">{theatre.name}</td>*/}
-      {/*            <td>*/}
-      {/*              <div*/}
-      {/*                style={{*/}
-      {/*                  display: "-webkit-box",*/}
-      {/*                  WebkitLineClamp: 2,*/}
-      {/*                  WebkitBoxOrient: "vertical",*/}
-      {/*                  overflow: "hidden",*/}
-      {/*                  textOverflow: "ellipsis",*/}
-      {/*                  lineHeight: "1.4em",*/}
-      {/*                  maxHeight: "2.8em",*/}
-      {/*                }}*/}
-      {/*                title={theatre.address}*/}
-      {/*              >*/}
-      {/*                {theatre.address}*/}
-      {/*              </div>*/}
-      {/*            </td>*/}
-      {/*            <td>{theatre.phone}</td>*/}
-      {/*            <td>{theatre.email}</td>*/}
-      {/*            <td>*/}
-      {/*              {theatre.isApproved ? (*/}
-      {/*                <span className="badge bg-success">Approved</span>*/}
-      {/*              ) : (*/}
-      {/*                <span className="badge bg-warning text-dark">*/}
-      {/*                  Pending Approval*/}
-      {/*                </span>*/}
-      {/*              )}*/}
-      {/*            </td>*/}
-      {/*            <td className="text-center">*/}
-      {/*              {theatre.isActive && theatre.isApproved ? (*/}
-      {/*                <Link*/}
-      {/*                  to={`/partner/theatre/${theatre._id}/shows`}*/}
-      {/*                  className="btn btn-sm btn-outline-success"*/}
-      {/*                  title="Manage Shows"*/}
-      {/*                >*/}
-      {/*                  <i className="bi bi-film me-1"></i> Shows*/}
-      {/*                </Link>*/}
-      {/*              ) : (*/}
-      {/*                <span className="text-muted small">*/}
-      {/*                  {!theatre.isApproved ? "Awaiting Approval" : "Inactive"}*/}
-      {/*                </span>*/}
-      {/*              )}*/}
-      {/*            </td>*/}
-      {/*            <td>*/}
-      {/*              <div className="d-flex gap-2 justify-content-center">*/}
-      {/*                <button*/}
-      {/*                  onClick={() => handleEdit(theatre._id)}*/}
-      {/*                  className="btn btn-sm btn-warning"*/}
-      {/*                  title="Edit"*/}
-      {/*                >*/}
-      {/*                  <i className="bi bi-pencil-square"></i>*/}
-      {/*                </button>*/}
-      {/*                <button*/}
-      {/*                  onClick={() => handleDelete(theatre._id)}*/}
-      {/*                  className="btn btn-sm btn-danger"*/}
-      {/*                  title="Delete"*/}
-      {/*                >*/}
-      {/*                  <i className="bi bi-trash-fill"></i>*/}
-      {/*                </button>*/}
-      {/*              </div>*/}
-      {/*            </td>*/}
-      {/*          </tr>*/}
-      {/*        ))*/}
-      {/*      ) : (*/}
-      {/*        <tr>*/}
-      {/*          <td colSpan="7" className="text-center py-5 text-muted">*/}
-      {/*            <div>*/}
-      {/*              <i className="bi bi-building fs-1 d-block mb-3"></i>*/}
-      {/*              <p className="mb-0">*/}
-      {/*                No theatres found. Add your first theatre to get started!*/}
-      {/*              </p>*/}
-      {/*            </div>*/}
-      {/*          </td>*/}
-      {/*        </tr>*/}
-      {/*      )}*/}
-      {/*    </tbody>*/}
-      {/*  </Table>*/}
-      {/*</div>*/}
+
       {data?.total_pages > 1 && (
         <div className="d-flex justify-content-center mt-4">
           <Pagination
             totalPages={data.total_pages}
+            currentPage={page}
             onPageChange={(page) => setPage(page)}
           />
         </div>

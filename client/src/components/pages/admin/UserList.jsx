@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React from "react";
 import Swal from "sweetalert2";
 import MainLoader from "../../common/MainLoader.jsx";
 import Pagination from "../../common/Pagination.jsx";
@@ -8,10 +8,23 @@ import {
   useGetAllUsersQuery,
   useVerifyUserMutation,
 } from "../../../api/userApi.js";
+import { useTableSearch } from "../../hooks/useTableSearch.js";
+import SearchBar from "../../common/SearchBar.jsx";
 
 const UserList = () => {
-  const [page, setPage] = useState(1);
-  const { data, isLoading } = useGetAllUsersQuery({ page });
+  const {
+    page,
+    searchTerm,
+    debouncedSearch,
+    handleSearch,
+    handleClearSearch,
+    setPage,
+  } = useTableSearch(1, 500);
+
+  const { data, isLoading, isFetching } = useGetAllUsersQuery({
+    page,
+    search: debouncedSearch,
+  });
   const [verifyUser] = useVerifyUserMutation();
 
   const toggleUserVerify = async (userObj) => {
@@ -118,13 +131,22 @@ const UserList = () => {
     },
   ];
 
-  if (isLoading) return <MainLoader />;
+  if (isLoading || isFetching) return <MainLoader />;
 
   return (
     <div className="container py-4">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h4 className="fw-bold mb-0">User List</h4>
       </div>
+
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        onClear={handleClearSearch}
+        placeholder="Search by name, phone or email..."
+        resultsCount={data?.total_items}
+        resultsQuery={debouncedSearch}
+      />
 
       <DataTable
         columns={columns}
@@ -137,6 +159,7 @@ const UserList = () => {
         <div className="d-flex justify-content-center mt-4">
           <Pagination
             totalPages={data.total_pages}
+            currentPage={page}
             onPageChange={(page) => setPage(page)}
           />
         </div>

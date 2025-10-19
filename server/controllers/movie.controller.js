@@ -2,7 +2,7 @@
 
 export const getAllMovies = async (req, res) => {
   try {
-    const { page, limit } = req.query;
+    const { page, limit, search } = req.query;
 
     let movies;
     let totalItems;
@@ -11,17 +11,32 @@ export const getAllMovies = async (req, res) => {
 
     const isPaginated = page !== undefined || limit !== undefined;
 
+    // Build search query
+    let searchQuery = {};
+    if (search) {
+      searchQuery = {
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { genre: { $regex: search, $options: "i" } },
+          { language: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
     if (isPaginated) {
       currentPage = parseInt(page) || 1;
       const itemsPerPage = parseInt(limit) || 4;
       const startIndex = (currentPage - 1) * itemsPerPage;
 
-      totalItems = await Movie.countDocuments();
+      totalItems = await Movie.countDocuments(searchQuery);
       totalPages = Math.ceil(totalItems / itemsPerPage);
 
-      movies = await Movie.find({}).skip(startIndex).limit(itemsPerPage);
+      movies = await Movie.find(searchQuery)
+        .skip(startIndex)
+        .limit(itemsPerPage);
     } else {
-      movies = await Movie.find({});
+      movies = await Movie.find(searchQuery);
       totalItems = movies.length;
     }
 
@@ -40,7 +55,6 @@ export const getAllMovies = async (req, res) => {
     });
   }
 };
-
 export const getMovieById = async (req, res) => {
   try {
     const movieId = req.params.movieId;

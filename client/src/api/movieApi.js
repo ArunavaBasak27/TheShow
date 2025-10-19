@@ -5,15 +5,24 @@ export const movieApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: "/api/movies" }),
   endpoints: (builder) => ({
     getAllMovies: builder.query({
-      query: ({ page, limit } = {}) => {
+      query: ({ page, limit, search } = {}) => {
         const isPaginated = page !== undefined || limit !== undefined;
 
-        const queryParams = isPaginated
-          ? `?page=${page || 1}&limit=${limit || 4}`
-          : ""; // no query params = fetch all
+        const params = new URLSearchParams();
+
+        if (isPaginated) {
+          params.append("page", page || 1);
+          params.append("limit", limit || 4);
+        }
+
+        if (search) {
+          params.append("search", search);
+        }
+
+        const queryString = params.toString();
 
         return {
-          url: `/${queryParams}`,
+          url: queryString ? `/?${queryString}` : `/`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",

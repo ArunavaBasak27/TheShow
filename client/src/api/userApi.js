@@ -42,16 +42,24 @@ export const userApi = createApi({
       }),
     }),
     getAllUsers: builder.query({
-      query: ({ page, limit } = {}) => {
+      query: ({ page, limit, search } = {}) => {
         const isPaginated = page !== undefined || limit !== undefined;
+        const params = new URLSearchParams();
 
-        const queryParams = isPaginated
-          ? `?page=${page || 1}&limit=${limit || 4}`
-          : ""; // no query params = fetch all
+        if (isPaginated) {
+          params.append("page", page || 1);
+          params.append("limit", limit || 4);
+        }
+
+        if (search) {
+          params.append("search", search);
+        }
+
+        const queryString = params.toString();
 
         return {
           method: "GET",
-          url: `/users/${queryParams}`,
+          url: queryString ? `/users/?${queryString}` : `/users`,
           headers: {
             "Content-Type": "application/json",
           },

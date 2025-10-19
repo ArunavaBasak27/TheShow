@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React from "react";
 import Swal from "sweetalert2";
 
 import MainLoader from "../../common/MainLoader.jsx";
@@ -9,11 +9,23 @@ import {
 } from "../../../api/theatreApi.js";
 import Pagination from "../../common/Pagination.jsx";
 import DataTable from "../../common/DataTable.jsx";
+import { useTableSearch } from "../../hooks/useTableSearch.js";
+import SearchBar from "../../common/SearchBar.jsx";
 
 const TheatreList = () => {
-  const [page, setPage] = useState(1);
+  const {
+    page,
+    searchTerm,
+    debouncedSearch,
+    handleSearch,
+    handleClearSearch,
+    setPage,
+  } = useTableSearch(1, 500);
 
-  const { data, isLoading } = useGetAllTheatresQuery({ page });
+  const { data, isLoading, isFetching } = useGetAllTheatresQuery({
+    page,
+    search: debouncedSearch,
+  });
   const [toggleStatus] = useChangeTheatreStatusMutation();
   const changeApproval = async (theatreObj) => {
     try {
@@ -53,7 +65,7 @@ const TheatreList = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <MainLoader />;
   }
 
@@ -121,17 +133,31 @@ const TheatreList = () => {
         <h4 className="fw-bold mb-0">Theatre List</h4>
       </div>
 
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        onClear={handleClearSearch}
+        placeholder="Search by title, description, genre, or language..."
+        resultsCount={data?.total_items}
+        resultsQuery={debouncedSearch}
+      />
+
       <DataTable
         columns={columns}
         data={data?.result || []}
         isLoading={isLoading}
-        emptyMessage="No theatres found. Add your first theatre to get started!"
+        emptyMessage={
+          debouncedSearch
+            ? `No movies found matching "${debouncedSearch}"`
+            : "No theatres found!"
+        }
       />
 
       {data?.total_pages > 1 && (
         <div className="d-flex justify-content-center mt-4">
           <Pagination
             totalPages={data.total_pages}
+            currentPage={page}
             onPageChange={(page) => setPage(page)}
           />
         </div>
