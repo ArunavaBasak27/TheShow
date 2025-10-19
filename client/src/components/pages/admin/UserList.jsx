@@ -90,20 +90,20 @@ const UserList = () => {
       ),
     },
     {
-      key: "isVerified",
+      key: "Action",
       label: "Action",
       width: "15%",
-      render: (val, row) => (
+      render: (_, row) => (
         <div className="d-flex flex-row align-items-center justify-content-center">
           <button
             onClick={() => toggleUserVerify(row)}
             className={`btn btn-sm btn-outline-${
               row.isVerified ? "danger" : "success"
             }`}
-            title={val ? "Unverify User" : "Verify User"}
+            title={row.isVerified ? "Unverify User" : "Verify User"}
             style={{ minWidth: "80px" }}
           >
-            {val ? (
+            {row.isVerified ? (
               <>
                 <i className="bi bi-ban me-1"></i> Unverify
               </>
