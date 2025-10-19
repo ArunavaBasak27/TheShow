@@ -5,22 +5,38 @@ export const bookingApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: "/api/bookings" }),
   endpoints: (builder) => ({
     getBookingsForUser: builder.query({
-      query: () => ({
-        url: "/user",
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+      query: ({ page, limit } = {}) => {
+        const isPaginated = page !== undefined || limit !== undefined;
+
+        const queryParams = isPaginated
+          ? `?page=${page || 1}&limit=${limit || 5}`
+          : ""; // no query params = fetch all
+
+        return {
+          url: `/user/${queryParams}`,
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
     }),
     getBookingsForPartner: builder.query({
-      query: () => ({
-        url: "/partner",
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+      query: ({ page, limit } = {}) => {
+        const isPaginated = page !== undefined || limit !== undefined;
+
+        const queryParams = isPaginated
+          ? `?page=${page || 1}&limit=${limit || 5}`
+          : ""; // no query params = fetch all
+
+        return {
+          url: `/partner/${queryParams}`,
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
     }),
     createBooking: builder.mutation({
       query: (bookingObj) => ({

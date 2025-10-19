@@ -124,16 +124,41 @@ export const getBookingsForUser = async (req, res) => {
   try {
     const user = req.user;
 
-    const bookings = await Booking.find({ user: user.id })
+    let bookings = await Booking.find({ user: user.id })
       .populate("user")
       .populate({
         path: "show",
         populate: { path: ["theatre", "movie"] },
       });
+
+    const { page, limit } = req.query;
+
+    const isPaginated = page !== undefined || limit !== undefined;
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalItems = bookings.length;
+
+    if (isPaginated) {
+      currentPage = parseInt(page) || 1;
+      const itemsPerPage = parseInt(limit) || 5;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+      bookings = await Booking.find({ user: user.id })
+        .skip(startIndex)
+        .limit(itemsPerPage)
+        .populate("user")
+        .populate({
+          path: "show",
+          populate: { path: ["theatre", "movie"] },
+        });
+    }
     res.json({
       success: true,
       message: "Bookings fetched successfully",
       result: bookings,
+      page: currentPage,
+      total_pages: totalPages,
+      total_items: totalItems,
     });
   } catch (error) {
     res.status(500).json({
@@ -153,16 +178,40 @@ export const getBookingsForPartner = async (req, res) => {
     const shows = await Show.find({ theatre: { $in: theatreIds } });
     const showIds = shows.map((show) => show._id);
 
-    const bookings = await Booking.find({ show: { $in: showIds } })
+    let bookings = await Booking.find({ show: { $in: showIds } })
       .populate("user")
       .populate({
         path: "show",
         populate: { path: ["theatre", "movie"] },
       });
+
+    const { page, limit } = req.query;
+
+    const isPaginated = page !== undefined || limit !== undefined;
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalItems = bookings.length;
+    if (isPaginated) {
+      currentPage = parseInt(page) || 1;
+      const itemsPerPage = parseInt(limit) || 5;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+      bookings = await Booking.find({ show: { $in: showIds } })
+        .skip(startIndex)
+        .limit(itemsPerPage)
+        .populate("user")
+        .populate({
+          path: "show",
+          populate: { path: ["theatre", "movie"] },
+        });
+    }
     res.json({
       success: true,
       message: "Bookings fetched successfully",
       result: bookings,
+      page: currentPage,
+      total_pages: totalPages,
+      total_items: totalItems,
     });
   } catch (error) {
     res.status(500).json({
