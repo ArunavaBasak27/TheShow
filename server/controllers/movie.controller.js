@@ -2,14 +2,39 @@
 
 export const getAllMovies = async (req, res) => {
   try {
-    const movies = await Movie.find({});
+    const { page, limit } = req.query;
+
+    let movies;
+    let totalItems;
+    let totalPages = 1;
+    let currentPage = 1;
+
+    const isPaginated = page !== undefined || limit !== undefined;
+
+    if (isPaginated) {
+      currentPage = parseInt(page) || 1;
+      const itemsPerPage = parseInt(limit) || 4;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+
+      totalItems = await Movie.countDocuments();
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      movies = await Movie.find({}).skip(startIndex).limit(itemsPerPage);
+    } else {
+      movies = await Movie.find({});
+      totalItems = movies.length;
+    }
+
     res.json({
       success: true,
       message: "Movies fetched successfully",
+      page: isPaginated ? currentPage : null,
       result: movies,
+      total_pages: isPaginated ? totalPages : 1,
+      total_items: totalItems,
     });
   } catch (error) {
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });

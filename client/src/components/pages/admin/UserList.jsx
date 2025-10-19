@@ -1,18 +1,20 @@
-﻿import React from "react";
+﻿import React, { useState } from "react";
+import { Table } from "react-bootstrap";
+import Swal from "sweetalert2";
+
+import MainLoader from "../../common/MainLoader.jsx";
+
 import {
   useGetAllUsersQuery,
   useVerifyUserMutation,
 } from "../../../api/userApi.js";
-import MainLoader from "../../common/MainLoader.jsx";
-import { Table } from "react-bootstrap";
-import Swal from "sweetalert2";
+import Pagination from "../../common/Pagination.jsx";
 
 const UserList = () => {
-  const { data, isLoading } = useGetAllUsersQuery();
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useGetAllUsersQuery({ page });
   const [verifyUser] = useVerifyUserMutation();
-  if (isLoading) {
-    return <MainLoader />;
-  }
+
   const toggleUserVerify = async (userObj) => {
     try {
       const userId = userObj._id;
@@ -43,51 +45,113 @@ const UserList = () => {
     } catch (error) {
       await Swal.fire({
         position: "top-end",
-        icon: "success",
-        title: error.message,
+        icon: "error",
+        title: error.message || "Something went wrong!",
         showConfirmButton: false,
         timer: 1500,
       });
     }
   };
+
+  if (isLoading) {
+    return <MainLoader />;
+  }
+
   return (
-    <div>
-      <h2></h2>
-      <Table className="mt-5" hover size="sm" responsive="sm">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody className="table-group-divider">
-          {data?.result.map((user, index) => {
-            return (
-              <tr key={index}>
-                <td>{user.name}</td>
-                <td>{user.address}</td>
-                <td>{user.phone}</td>
-                <td>{user.email}</td>
-                <td>
-                  <button
-                    onClick={() => toggleUserVerify(user)}
-                    className={`btn btn-outline-${user.isVerified ? "danger" : "success"}`}
-                  >
-                    {user.isVerified ? (
-                      <i className="bi bi-ban"></i>
-                    ) : (
-                      <i className="bi bi-check"></i>
-                    )}
-                  </button>
+    <div className="container py-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <h4 className="fw-bold mb-0">User List</h4>
+      </div>
+
+      <div className="table-responsive">
+        <Table bordered hover className="align-middle mb-0">
+          <thead className="table-light">
+            <tr>
+              <th style={{ width: "20%" }}>Name</th>
+              <th style={{ width: "30%" }}>Address</th>
+              <th style={{ width: "15%" }}>Phone</th>
+              <th style={{ width: "20%" }}>Email</th>
+              <th style={{ width: "15%" }}>Status</th>
+              <th style={{ width: "140px" }} className="text-center">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.result?.length > 0 ? (
+              data.result.map((user) => (
+                <tr key={user._id}>
+                  <td className="fw-semibold">{user.name}</td>
+                  <td>
+                    <div
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        lineHeight: "1.4em",
+                        maxHeight: "2.8em",
+                      }}
+                      title={user.address}
+                    >
+                      {user.address}
+                    </div>
+                  </td>
+                  <td>{user.phone}</td>
+                  <td>{user.email}</td>
+                  <td>
+                    <span
+                      className={`badge bg-${user.isVerified ? "success" : "warning"}`}
+                    >
+                      {user.isVerified ? "Verified" : "Unverified"}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="d-flex gap-2 justify-content-center">
+                      <button
+                        onClick={() => toggleUserVerify(user)}
+                        className={`btn btn-sm btn-outline-${user.isVerified ? "danger" : "success"}`}
+                        title={
+                          user.isVerified ? "Unverify User" : "Verify User"
+                        }
+                        style={{ minWidth: "80px" }}
+                      >
+                        {user.isVerified ? (
+                          <>
+                            <i className="bi bi-ban me-1"></i> Unverify
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-check-lg me-1"></i> Verify
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="text-center py-5 text-muted">
+                  <div>
+                    <i className="bi bi-people fs-1 d-block mb-3"></i>
+                    <p className="mb-0">No users found.</p>
+                  </div>
                 </td>
               </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+            )}
+          </tbody>
+        </Table>
+      </div>
+      {data?.total_pages > 1 && (
+        <div className="d-flex justify-content-center mt-4">
+          <Pagination
+            totalPages={data.total_pages}
+            onPageChange={(page) => setPage(page)}
+          />
+        </div>
+      )}
     </div>
   );
 };

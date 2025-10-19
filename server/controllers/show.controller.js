@@ -19,12 +19,42 @@ export const getShowById = async (req, res) => {
 
 export const getShowsByTheatre = async (req, res) => {
   try {
+    const { page, limit } = req.query;
+    let totalItems;
+    let currentPage = 1;
+    let totalPages = 1;
+    let shows;
+
+    const isPaginated = page !== undefined || limit !== undefined;
     const theatreId = req.params.theatreId;
-    const shows = await Show.find({ theatre: theatreId });
+
+    if (isPaginated) {
+      currentPage = parseInt(page) || 1;
+      let itemsPerPage = parseInt(limit) || 4;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      totalItems = await Show.find({
+        theatre: theatreId,
+      }).countDocuments();
+
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      shows = await Show.find({ theatre: theatreId })
+        .skip(startIndex)
+        .limit(itemsPerPage)
+        .sort({ date: -1 });
+    } else {
+      shows = await Show.find({ theatre: theatreId });
+      totalItems = await Show.find({
+        theatre: theatreId,
+      }).countDocuments();
+    }
+
     res.json({
       success: true,
       message: "Shows fetched successfully",
       result: shows,
+      total_items: totalItems,
+      total_pages: totalPages,
     });
   } catch (error) {
     res.json({
@@ -36,7 +66,7 @@ export const getShowsByTheatre = async (req, res) => {
 
 export const getShowsByFilter = async (req, res) => {
   try {
-    const { movie, theatre, date } = req.query;
+    const { movie, theatre, date, page, limit } = req.query;
     const filter = {};
     if (movie) {
       filter.movie = movie;
@@ -46,27 +76,66 @@ export const getShowsByFilter = async (req, res) => {
     }
     if (date) {
       const targetDate = new Date(date);
-      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
-
+      const startOfDay = new Date(
+        targetDate.getFullYear(),
+        targetDate.getMonth(),
+        targetDate.getDate(),
+        0,
+        0,
+        0,
+        0,
+      );
+      const endOfDay = new Date(
+        targetDate.getFullYear(),
+        targetDate.getMonth(),
+        targetDate.getDate(),
+        23,
+        59,
+        59,
+        999,
+      );
       filter.date = { $gte: startOfDay, $lte: endOfDay };
     }
-    const showDetails = await Show.find(filter)
-      .populate("theatre")
-      .populate("movie");
+
+    const totalItems = await Show.countDocuments(filter);
+    let showDetails;
+    let totalPages = 1;
+    const sortOptions = { date: -1 };
+
+    const isPaginated = page !== undefined || limit !== undefined;
+    if (isPaginated) {
+      const currentPage = parseInt(page) || 1;
+      const itemsPerPage = parseInt(limit) || 4;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+
+      showDetails = await Show.find(filter)
+        .sort(sortOptions)
+        .populate("theatre")
+        .populate("movie")
+        .skip(startIndex)
+        .limit(itemsPerPage);
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+    } else {
+      showDetails = await Show.find(filter)
+        .sort(sortOptions)
+        .populate("theatre")
+        .populate("movie");
+    }
+
     res.json({
       success: true,
       message: "Shows fetched successfully",
       result: showDetails,
+      total_items: totalItems,
+      total_pages: totalPages,
     });
   } catch (error) {
-    res.json({
+    res.status(500).json({
       success: false,
-      error: error,
+      error: error.message,
     });
   }
 };
-
 export const createShow = async (req, res) => {
   try {
     const theatreId = req.params.theatreId;

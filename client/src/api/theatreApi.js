@@ -5,13 +5,19 @@ export const theatreApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: "/api/theatres" }),
   endpoints: (builder) => ({
     getAllTheatres: builder.query({
-      query: () => ({
-        url: "/",
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+      query: ({ page, limit } = {}) => {
+        const isPaginated = page !== undefined || limit !== undefined;
+        const queryParams = isPaginated
+          ? `?page=${page || 1}&limit=${limit || 4}`
+          : ""; // no query params = fetch all
+        return {
+          url: `/${queryParams}`,
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
       providesTags: ["theatres"],
     }),
     getTheatreById: builder.query({
@@ -25,13 +31,20 @@ export const theatreApi = createApi({
       providesTags: ["theatres"],
     }),
     getTheatresByOwner: builder.query({
-      query: (userId) => ({
-        url: "/user",
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+      query: ({ userId, page, limit }) => {
+        const isPaginated = page !== undefined || limit !== undefined;
+        const queryParams = isPaginated
+          ? `?page=${page || 1}&limit=${limit || 4}`
+          : ""; // no query params = fetch all
+
+        return {
+          url: `/user/${queryParams}`,
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
       providesTags: ["theatres"],
     }),
     createTheatre: builder.mutation({

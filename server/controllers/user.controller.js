@@ -100,11 +100,35 @@ export const currentUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const userList = await User.find({ role: "user" }).select("-password");
+    const { page, limit } = req.query;
+    let userList;
+    let totalItems;
+    let totalPages = 1;
+    let currentPage = 1;
+    const isPaginated = page !== undefined || limit !== undefined;
+
+    if (isPaginated) {
+      currentPage = parseInt(page) || 1;
+      const itemsPerPage = parseInt(limit) || 4;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      totalItems = await User.countDocuments();
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      userList = await User.find()
+        .select("-password")
+        .skip(startIndex)
+        .limit(itemsPerPage);
+    } else {
+      userList = await User.find().select("-password");
+      totalItems = userList.length;
+    }
+
     res.json({
       success: true,
       message: "User fetched",
       result: userList,
+      total_pages: totalPages,
+      total_items: totalItems,
     });
   } catch (error) {
     res.json({

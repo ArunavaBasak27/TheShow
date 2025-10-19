@@ -42,13 +42,21 @@ export const userApi = createApi({
       }),
     }),
     getAllUsers: builder.query({
-      query: () => ({
-        method: "GET",
-        url: "/users",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+      query: ({ page, limit } = {}) => {
+        const isPaginated = page !== undefined || limit !== undefined;
+
+        const queryParams = isPaginated
+          ? `?page=${page || 1}&limit=${limit || 4}`
+          : ""; // no query params = fetch all
+
+        return {
+          method: "GET",
+          url: `/users/${queryParams}`,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
       providesTags: ["user"],
     }),
     verifyUser: builder.mutation({
