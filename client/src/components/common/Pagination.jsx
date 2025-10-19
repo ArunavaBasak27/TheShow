@@ -1,32 +1,18 @@
 ﻿import { useEffect, useState } from "react";
 
 const Pagination = ({ onPageChange, totalPages, currentPage = 1 }) => {
-  // Add currentPage prop, default to 1
   const [pages, setPages] = useState([]);
-  const [selectedPage, setSelectedPage] = useState(currentPage); // Initialize with prop
-  const THRESHOLD = 3;
+  const THRESHOLD = 5;
 
-  // Sync internal state with parent's currentPage
   useEffect(() => {
-    setSelectedPage(currentPage);
     setNewPageList(currentPage);
-  }, [currentPage]);
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
-    const list = Array.from(
-      { length: Math.min(totalPages, THRESHOLD) },
-      (_, i) => i + 1,
-    );
-    setPages(list);
-  }, [totalPages]);
-
-  useEffect(() => {
-    if (selectedPage > totalPages && totalPages > 0) {
-      setSelectedPage(1);
-      setNewPageList(1);
-      onPageChange(1); // Notify parent to sync
+    if (currentPage > totalPages && totalPages > 0) {
+      onPageChange(1); // Reset to first page if out of bounds
     }
-  }, [totalPages, selectedPage, onPageChange]); // Add dependencies for safety
+  }, [currentPage, totalPages, onPageChange]);
 
   const setNewPageList = (pageNo) => {
     const itemsLength = Math.min(totalPages, THRESHOLD);
@@ -46,9 +32,7 @@ const Pagination = ({ onPageChange, totalPages, currentPage = 1 }) => {
 
   const handleClick = (page) => {
     if (page < 1 || page > totalPages) return;
-    onPageChange(page); // This will update parent's page, which flows back via currentPage
-    // No need to setSelectedPage here—parent's update will trigger the sync useEffect
-    setNewPageList(page);
+    onPageChange(page);
   };
 
   if (totalPages <= 1) return null;
@@ -56,15 +40,15 @@ const Pagination = ({ onPageChange, totalPages, currentPage = 1 }) => {
   return (
     <nav>
       <ul className="pagination justify-content-center mt-3">
-        <li className={`page-item ${selectedPage === 1 ? "disabled" : ""}`}>
+        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => handleClick(1)}>
             &laquo;
           </button>
         </li>
-        <li className={`page-item ${selectedPage === 1 ? "disabled" : ""}`}>
+        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
           <button
             className="page-link"
-            onClick={() => handleClick(selectedPage - 1)}
+            onClick={() => handleClick(currentPage - 1)}
           >
             &lt;
           </button>
@@ -73,7 +57,7 @@ const Pagination = ({ onPageChange, totalPages, currentPage = 1 }) => {
         {pages.map((page) => (
           <li
             key={page}
-            className={`page-item ${page === selectedPage ? "active" : ""}`}
+            className={`page-item ${page === currentPage ? "active" : ""}`}
           >
             <button className="page-link" onClick={() => handleClick(page)}>
               {page}
@@ -82,17 +66,17 @@ const Pagination = ({ onPageChange, totalPages, currentPage = 1 }) => {
         ))}
 
         <li
-          className={`page-item ${selectedPage === totalPages ? "disabled" : ""}`}
+          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
         >
           <button
             className="page-link"
-            onClick={() => handleClick(selectedPage + 1)}
+            onClick={() => handleClick(currentPage + 1)}
           >
             &gt;
           </button>
         </li>
         <li
-          className={`page-item ${selectedPage === totalPages ? "disabled" : ""}`}
+          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
         >
           <button className="page-link" onClick={() => handleClick(totalPages)}>
             &raquo;

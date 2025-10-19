@@ -1,38 +1,54 @@
 ﻿import React from "react";
 import moment from "moment";
 import DataTable from "../../common/DataTable.jsx";
+import { useSelector } from "react-redux";
 
 const BookingList = ({ bookings = [] }) => {
-  const columns = [
+  const user = useSelector((state) => state.userStore.user);
+  let columns = [
     {
-      key: "user",
-      label: "Customer Name",
-      width: "15%",
-      render: (val) => <span className="fw-semibold">{val.name}</span>,
+      key: "createdAt",
+      label: "Booking date",
+      width: "10%",
+      render: (val) => (
+        <span className="text-secondary">
+          {moment(val).format("MMM DD, YYYY hh:mm A")}
+        </span>
+      ),
     },
     {
-      key: "user",
+      key: "Customer Name",
+      label: "Customer Name",
+      width: "10%",
+      render: (val, row) => (
+        <span className="fw-semibold">{row.user.name}</span>
+      ),
+    },
+    {
+      key: "Customer Email",
       label: "Email",
-      width: "18%",
-      render: (val) => val.email,
+      width: "10%",
+      render: (val, row) => row.user.email,
     },
     {
       key: "user",
       label: "Phone",
-      width: "12%",
+      width: "10%",
       render: (val) => val.phone,
     },
     {
-      key: "show",
+      key: "Theatre name",
       label: "Theatre",
-      width: "15%",
-      render: (val) => val.theatre.name,
+      width: "10%",
+      render: (val, row) => row.show.theatre.name,
     },
     {
-      key: "show",
+      key: "Movie name",
       label: "Movie",
       width: "15%",
-      render: (val) => <span className="fw-semibold">{val.movie.title}</span>,
+      render: (val, row) => (
+        <span className="fw-semibold">{row.show.movie.title}</span>
+      ),
     },
     {
       key: "show",
@@ -69,18 +85,18 @@ const BookingList = ({ bookings = [] }) => {
     },
   ];
 
-  return (
-    <div className="container py-4">
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <h4 className="fw-bold mb-0">Booking List</h4>
-      </div>
+  if (user?.role === "user") {
+    columns = columns.filter(
+      (col) => !["Customer Name", "Email", "Phone"].includes(col.label),
+    );
+  }
 
-      <DataTable
-        columns={columns}
-        data={bookings}
-        emptyMessage="No bookings found."
-      />
-    </div>
+  return (
+    <DataTable
+      columns={columns}
+      data={bookings}
+      emptyMessage="No bookings found."
+    />
   );
 };
 

@@ -5,15 +5,24 @@ export const bookingApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: "/api/bookings" }),
   endpoints: (builder) => ({
     getBookingsForUser: builder.query({
-      query: ({ page, limit } = {}) => {
+      query: ({ page, limit, search } = {}) => {
         const isPaginated = page !== undefined || limit !== undefined;
 
-        const queryParams = isPaginated
-          ? `?page=${page || 1}&limit=${limit || 5}`
-          : ""; // no query params = fetch all
+        const params = new URLSearchParams();
+
+        if (isPaginated) {
+          params.append("page", page || 1);
+          params.append("limit", limit || 4);
+        }
+
+        if (search) {
+          params.append("search", search);
+        }
+
+        const queryString = params.toString();
 
         return {
-          url: `/user/${queryParams}`,
+          url: `/user/?${queryString}`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -22,15 +31,24 @@ export const bookingApi = createApi({
       },
     }),
     getBookingsForPartner: builder.query({
-      query: ({ page, limit } = {}) => {
+      query: ({ page, limit, search } = {}) => {
         const isPaginated = page !== undefined || limit !== undefined;
 
-        const queryParams = isPaginated
-          ? `?page=${page || 1}&limit=${limit || 5}`
-          : ""; // no query params = fetch all
+        const params = new URLSearchParams();
+
+        if (isPaginated) {
+          params.append("page", page || 1);
+          params.append("limit", limit || 4);
+        }
+
+        if (search) {
+          params.append("search", search);
+        }
+
+        const queryString = params.toString();
 
         return {
-          url: `/partner/${queryParams}`,
+          url: `/partner/?${queryString}`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -5,6 +5,7 @@ import { stripe } from "../app.js";
 import { User } from "../models/user.model.js";
 import emailHelper from "../email/emailHelper.js";
 import moment from "moment";
+import { Movie } from "../models/movie.model.js";
 
 export const initiatePayment = async (req, res) => {
   try {
@@ -123,19 +124,40 @@ export const createBooking = async (req, res) => {
 export const getBookingsForUser = async (req, res) => {
   try {
     const user = req.user;
+    const { page, limit, search } = req.query;
 
-    let bookings = await Booking.find({ user: user.id })
+    const isPaginated = page !== undefined || limit !== undefined;
+    let currentPage = 1;
+    let totalPages = 1;
+
+    let searchQuery = { user: user.id };
+    if (search) {
+      const matchedMovies = await Movie.find({
+        title: { $regex: search, $options: "i" },
+      }).select("_id");
+      const matchedTheatres = await Theatre.find({
+        name: { $regex: search, $options: "i" },
+      }).select("_id");
+      const matchedShowIds = await Show.find({
+        $or: [
+          { movie: { $in: matchedMovies.map((m) => m._id) } },
+          { theatre: { $in: matchedTheatres.map((t) => t._id) } },
+        ],
+      }).select("_id");
+
+      searchQuery.show = {
+        $in: matchedShowIds.map((s) => s._id),
+      };
+    }
+
+    let bookings = await Booking.find(searchQuery)
+      .sort({ createdAt: -1 })
       .populate("user")
       .populate({
         path: "show",
         populate: { path: ["theatre", "movie"] },
       });
 
-    const { page, limit } = req.query;
-
-    const isPaginated = page !== undefined || limit !== undefined;
-    let currentPage = 1;
-    let totalPages = 1;
     let totalItems = bookings.length;
 
     if (isPaginated) {
@@ -143,7 +165,8 @@ export const getBookingsForUser = async (req, res) => {
       const itemsPerPage = parseInt(limit) || 5;
       const startIndex = (currentPage - 1) * itemsPerPage;
       totalPages = Math.ceil(totalItems / itemsPerPage);
-      bookings = await Booking.find({ user: user.id })
+      bookings = await Booking.find(searchQuery)
+        .sort({ createdAt: -1 })
         .skip(startIndex)
         .limit(itemsPerPage)
         .populate("user")
@@ -171,6 +194,7 @@ export const getBookingsForUser = async (req, res) => {
 export const getBookingsForPartner = async (req, res) => {
   try {
     const user = req.user;
+    const { page, limit, search } = req.query;
 
     const theatres = await Theatre.find({ owner: user.id });
     const theatreIds = theatres.map((theatre) => theatre._id);
@@ -178,25 +202,50 @@ export const getBookingsForPartner = async (req, res) => {
     const shows = await Show.find({ theatre: { $in: theatreIds } });
     const showIds = shows.map((show) => show._id);
 
-    let bookings = await Booking.find({ show: { $in: showIds } })
+    let searchQuery = { show: { $in: showIds } };
+    if (search) {
+      const matchedMovies = await Movie.find({
+        title: { $regex: search, $options: "i" },
+      }).select("_id");
+
+      const matchedTheatres = await Theatre.find({
+        name: { $regex: search, $options: "i" },
+      }).select("_id");
+
+      const matchedUsers = await User.find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+        ],
+      }).select("_id");
+
+      searchQuery.$or = [
+        { movie: { $in: matchedMovies.map((m) => m._id) } },
+        { theatre: { $in: matchedTheatres.map((t) => t._id) } },
+        { user: { $in: matchedUsers.map((u) => u._id) } },
+      ];
+    }
+
+    let bookings = await Booking.find(searchQuery)
+      .sort({ createdAt: -1 })
       .populate("user")
       .populate({
         path: "show",
         populate: { path: ["theatre", "movie"] },
       });
-
-    const { page, limit } = req.query;
+    let totalItems = bookings.length;
 
     const isPaginated = page !== undefined || limit !== undefined;
     let currentPage = 1;
     let totalPages = 1;
-    let totalItems = bookings.length;
     if (isPaginated) {
       currentPage = parseInt(page) || 1;
       const itemsPerPage = parseInt(limit) || 5;
       const startIndex = (currentPage - 1) * itemsPerPage;
       totalPages = Math.ceil(totalItems / itemsPerPage);
-      bookings = await Booking.find({ show: { $in: showIds } })
+      bookings = await Booking.find(searchQuery)
+        .sort({ createdAt: -1 })
         .skip(startIndex)
         .limit(itemsPerPage)
         .populate("user")
@@ -205,6 +254,7 @@ export const getBookingsForPartner = async (req, res) => {
           populate: { path: ["theatre", "movie"] },
         });
     }
+
     res.json({
       success: true,
       message: "Bookings fetched successfully",
