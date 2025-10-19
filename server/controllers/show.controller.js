@@ -1,5 +1,6 @@
 import { Theatre } from "../models/theatre.model.js";
 import { Show } from "../models/show.model.js";
+import { Movie } from "../models/movie.model.js";
 
 export const getShowById = async (req, res) => {
   try {
@@ -19,7 +20,7 @@ export const getShowById = async (req, res) => {
 
 export const getShowsByTheatre = async (req, res) => {
   try {
-    const { page, limit } = req.query;
+    const { page, limit, search } = req.query;
     let totalItems;
     let currentPage = 1;
     let totalPages = 1;
@@ -27,6 +28,15 @@ export const getShowsByTheatre = async (req, res) => {
 
     const isPaginated = page !== undefined || limit !== undefined;
     const theatreId = req.params.theatreId;
+
+    let searchQuery = { theatre: theatreId };
+    if (search) {
+      const matchedMovies = await Movie.find({
+        title: { $regex: search, $options: "i" },
+      }).select("_id");
+
+      searchQuery.$or = [{ movie: { $in: matchedMovies.map((m) => m._id) } }];
+    }
 
     if (isPaginated) {
       currentPage = parseInt(page) || 1;
@@ -38,12 +48,12 @@ export const getShowsByTheatre = async (req, res) => {
 
       totalPages = Math.ceil(totalItems / itemsPerPage);
 
-      shows = await Show.find({ theatre: theatreId })
+      shows = await Show.find(searchQuery)
         .skip(startIndex)
         .limit(itemsPerPage)
         .sort({ date: -1 });
     } else {
-      shows = await Show.find({ theatre: theatreId });
+      shows = await Show.find(searchQuery).sort({ date: -1 });
       totalItems = await Show.find({
         theatre: theatreId,
       }).countDocuments();
@@ -66,7 +76,7 @@ export const getShowsByTheatre = async (req, res) => {
 
 export const getShowsByFilter = async (req, res) => {
   try {
-    const { movie, theatre, date, page, limit } = req.query;
+    const { movie, theatre, date, page, limit, search } = req.query;
     const filter = {};
     if (movie) {
       filter.movie = movie;
@@ -95,6 +105,21 @@ export const getShowsByFilter = async (req, res) => {
         999,
       );
       filter.date = { $gte: startOfDay, $lte: endOfDay };
+    }
+
+    if (search) {
+      const matchedMovies = await Movie.find({
+        title: { $regex: search, $options: "i" },
+      }).select("_id");
+
+      const matchedTheatres = await Theatre.find({
+        name: { $regex: search, $options: "i" },
+      }).select("_id");
+
+      filter.$or = [
+        { movie: { $in: matchedMovies.map((m) => m._id) } },
+        { theatre: { $in: matchedTheatres.map((t) => t._id) } },
+      ];
     }
 
     const totalItems = await Show.countDocuments(filter);

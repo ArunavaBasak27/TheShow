@@ -57,13 +57,24 @@ export const showApi = createApi({
       providesTags: ["shows"],
     }),
     getShowsByTheatre: builder.query({
-      query: ({ theatreId, page, limit } = {}) => {
+      query: ({ theatreId, page, limit, search } = {}) => {
         const isPaginated = page !== undefined || limit !== undefined;
-        const queryParams = isPaginated
-          ? `?theatre=${theatreId}&page=${page || 1}&limit=${limit || 4}`
-          : `?theatre=${theatreId}`;
+
+        const params = new URLSearchParams();
+        params.append("theatre", theatreId);
+
+        if (isPaginated) {
+          params.append("page", page || 1);
+          params.append("limit", limit || 4);
+        }
+        if (search) {
+          params.append("search", search);
+        }
+
+        const queryString = params.toString();
+
         return {
-          url: `/${queryParams}`,
+          url: `/?${queryString}`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",

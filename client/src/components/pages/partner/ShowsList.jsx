@@ -10,15 +10,33 @@ import {
   useDeleteShowMutation,
   useGetShowsByTheatreQuery,
 } from "../../../api/showApi.js";
+import { useTableSearch } from "../../hooks/useTableSearch.js";
+import SearchBar from "../../common/SearchBar.jsx";
+import { useGetTheatreByIdQuery } from "../../../api/theatreApi.js";
+import MainLoader from "../../common/MainLoader.jsx";
 
 const ShowsList = () => {
-  const [page, setPage] = useState(1);
+  const {
+    page,
+    searchTerm,
+    debouncedSearch,
+    handleSearch,
+    handleClearSearch,
+    setPage,
+  } = useTableSearch(1, 500);
+
   const { theatreId } = useParams();
-  const { data, isLoading } = useGetShowsByTheatreQuery({ theatreId, page });
+  const { data, isLoading, isFetching } = useGetShowsByTheatreQuery({
+    theatreId,
+    page,
+    search: debouncedSearch,
+  });
+
   const [showId, setShowId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteShow] = useDeleteShowMutation();
-
+  const { data: theatre, isLoading: theatreLoading } =
+    useGetTheatreByIdQuery(theatreId);
   const handleEdit = (id) => {
     setShowId(id);
     setIsModalOpen(true);
@@ -115,13 +133,13 @@ const ShowsList = () => {
       render: (val) => <span className="text-success fw-semibold">₹{val}</span>,
     },
   ];
-
+  if (isLoading || isFetching || theatreLoading) {
+    return <MainLoader />;
+  }
   return (
     <div className="container py-4">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <h4 className="fw-bold mb-0">
-          {/* Shows for {data?.result[0].theatre.name} */}
-        </h4>
+        <h4 className="fw-bold mb-0">Shows for {theatre?.result.name}</h4>
         <button
           className="btn btn-outline-primary"
           style={{ minWidth: "150px" }}
@@ -133,6 +151,15 @@ const ShowsList = () => {
           <i className="bi bi-plus-lg me-2"></i> Add Show
         </button>
       </div>
+
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        onClear={handleClearSearch}
+        placeholder="Search by title, description, genre, or language..."
+        resultsCount={data?.total_items}
+        resultsQuery={debouncedSearch}
+      />
 
       <DataTable
         columns={columns}
