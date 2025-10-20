@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { useGetMovieByIdQuery } from "../api/movieApi.js";
 import { useGetShowByIdQuery } from "../api/showApi.js";
 import { useGetTheatreByIdQuery } from "../api/theatreApi.js";
@@ -177,13 +177,19 @@ const BookShow = () => {
         <div className="mt-4 text-center">
           <h5>Selected Seats: {selectedSeats.join(", ") || "None"}</h5>
           <h6>Total Price: Rs. {selectedSeats.length * show.ticketPrice}/-</h6>
-          <button
-            className="btn btn-success mt-2"
-            onClick={handleBooking}
-            disabled={selectedSeats.length === 0 || !user}
-          >
-            Proceed to Book
-          </button>
+          {user && user.id ? (
+            <button
+              className="btn btn-success mt-2"
+              onClick={handleBooking}
+              disabled={selectedSeats.length === 0 || !user}
+            >
+              Proceed to Book
+            </button>
+          ) : (
+            <Link to="/login" className="btn btn-success mt-2">
+              Login to Book
+            </Link>
+          )}
         </div>
         {clientSecret && (
           <Elements
