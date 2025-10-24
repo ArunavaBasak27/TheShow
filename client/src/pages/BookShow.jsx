@@ -67,7 +67,6 @@ const BookShow = () => {
         showId,
         seats: selectedSeats,
       }).unwrap();
-      console.log(response);
       if (response.success) {
         setClientSecret(response.result);
       } else {

@@ -19,10 +19,10 @@ const Header = () => {
         toastNotify({ message: "Logged out successfully", type: "warning" });
         navigate("/");
       } else {
-        console.error("Logout failed:", response);
+        toastNotify({ message: "Logout failed:", type: "warning" });
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      toastNotify({ message: error.message, type: "warning" });
     }
   };
   return (

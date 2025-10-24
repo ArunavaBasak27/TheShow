@@ -52,7 +52,6 @@ const ShowForm = ({ show, onHide, theatreId, showId }) => {
       }
     }
   }, [show, showLoading, showData, showId, moviesLoading]);
-  console.log(userInput);
 
   const onSubmit = async (e) => {
     e.preventDefault();
