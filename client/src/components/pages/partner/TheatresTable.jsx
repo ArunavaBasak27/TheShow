@@ -162,7 +162,7 @@ const TheatresTable = () => {
         searchTerm={searchTerm}
         onSearchChange={handleSearch}
         onClear={handleClearSearch}
-        placeholder="Search by title, description, genre, or language..."
+        placeholder="Search by name, address or phone..."
         resultsCount={data?.total_items}
         resultsQuery={debouncedSearch}
       />
