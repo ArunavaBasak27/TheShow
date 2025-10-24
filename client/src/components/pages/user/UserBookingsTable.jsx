@@ -33,7 +33,7 @@ const UserBookingsTable = () => {
           searchTerm={searchTerm}
           onSearchChange={handleSearch}
           onClear={handleClearSearch}
-          placeholder="Search by title, description, genre, or language..."
+          placeholder="Search by theatre or movie name..."
           resultsCount={data?.total_items}
           resultsQuery={debouncedSearch}
         />

@@ -38,7 +38,7 @@ const PartnerBookingsTable = () => {
           searchTerm={searchTerm}
           onSearchChange={handleSearch}
           onClear={handleClearSearch}
-          placeholder="Search by title, description, genre, or language..."
+          placeholder="Search by customer name, email or contact number..."
           resultsCount={data?.total_items}
           resultsQuery={debouncedSearch}
         />
