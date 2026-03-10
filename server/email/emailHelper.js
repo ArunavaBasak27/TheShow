@@ -4,7 +4,7 @@ import fs from "fs";
 import dotenv from "dotenv";
 import juice from "juice";
 
-dotenv.config({ path: "../.env" });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +43,8 @@ const emailHelper = async ({ receiverEmail, templateName, credentials }) => {
     const result = await response.json();
 
     if (!response.ok) {
+      console.log(process.env.BREVO_SENDER_EMAIL);
+      console.log(process.env.BREVO_API);
       throw new Error(result.message || "Failed to send email");
     }
 
