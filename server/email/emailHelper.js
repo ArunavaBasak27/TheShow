@@ -4,10 +4,9 @@ import fs from "fs";
 import dotenv from "dotenv";
 import juice from "juice";
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const replaceContent = (content, credentials) => {
   return Object.keys(credentials).reduce((updatedContent, key) => {
