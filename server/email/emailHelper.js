@@ -43,7 +43,7 @@ const emailHelper = async ({ receiverEmail, templateName, credentials }) => {
 
     if (!response.ok) {
       console.log(process.env.BREVO_SENDER_EMAIL);
-      console.log(process.env.BREVO_API);
+      console.log(process.env.BREVO_API_KEY);
       throw new Error(result.message || "Failed to send email");
     }
 
